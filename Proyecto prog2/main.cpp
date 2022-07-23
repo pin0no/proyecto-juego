@@ -5,6 +5,10 @@
 #include <Windows.h>
 #define ancho 1024
 #define alto 768
+#define M 64
+#define N 64
+
+void cargarmapa(int mat[M][N]);
 
 struct posicion
 {
@@ -14,6 +18,7 @@ struct posicion
 typedef posicion movimiento;
 using namespace std;
 
+int mat[M][N];
 /*int posicionX = 0 , posicionY = 0;*/
 
 
@@ -40,8 +45,8 @@ int main()
 	event_queue = al_create_event_queue();
 	al_register_event_source(event_queue, al_get_keyboard_event_source());
 
-	ALLEGRO_BITMAP* menu_null = al_load_bitmap("imagenes/cesped.jpg");/*imagenes a utilizar*/
-	ALLEGRO_BITMAP* menu_null1 = al_load_bitmap("imagenes/hola.png");
+	ALLEGRO_BITMAP* menu_null = al_load_bitmap("datos/imagenes/pared.png");/*imagenes a utilizar*/
+	ALLEGRO_BITMAP* menu_null1 = al_load_bitmap("datos/imagenes/hola.png");
 	/*ALLEGRO_BITMAP* menu_null1 = al_load_bitmap("imagenes/cara_benja.PNG"); */
 	
 	ALLEGRO_KEYBOARD_STATE* state{};
@@ -50,8 +55,10 @@ int main()
 	{
 		ALLEGRO_EVENT evento;
 		/*al_clear_to_color(al_map_rgb(0, 0, 0));*/
-		al_draw_bitmap(menu_null, 0, 0, 0);/*primera imagen*/
-		al_draw_bitmap(menu_null1, jugador.posicionX, jugador.posicionY, 0);/*segunda imagen*/
+		/*al_draw_bitmap(menu_null, 0, 0, 0);*//*primera imagen*/
+		/*al_draw_bitmap(menu_null1, jugador.posicionX, jugador.posicionY, 0); *//*segunda imagen*/
+		cargarmapa(mat);
+		
 		al_flip_display();/*mostrar las imagenes en pantalla*/
 		al_wait_for_event(event_queue, &evento);
 		
@@ -90,5 +97,27 @@ int main()
 		}
 	}
 	return 0;
+}
+void cargarmapa(int mat[M][N])
+{
+	int i, j;
+	char x, p;
+	ALLEGRO_FILE* mapa = al_fopen("datos/mapas/mapa1.txt","r");
+
+	for (i = 0; i < M; i++)
+	{
+		for (j = 0; j < N; j++)
+		{
+			if (mat[i][j] == x)
+			{
+				al_draw_bitmap(al_load_bitmap("datos/imagenes/pared.png"),i*16,j*12,0);
+			}
+			if (mat[i][j] == p)
+			{
+				al_draw_bitmap(al_load_bitmap("datos/imagenes/hola.png"), i * 16, j * 12, 0);
+			}
+		}
+	}
+
 }
 
