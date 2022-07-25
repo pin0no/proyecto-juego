@@ -101,18 +101,29 @@ int main()
 void cargarmapa(int mat[M][N])
 {
 	int i, j;
-	char x, p;
-	ALLEGRO_FILE* mapa = al_fopen("datos/mapas/mapa1.txt","r");
+	char* texto;
+	long medida;
+	
+	ALLEGRO_FILE* mapa ;
+	mapa = al_fopen("datos/mapas/mapa1.txt", "r");
 
+	al_fseek(mapa, 0, SEEK_END);
+	medida = al_ftell(mapa);
+	printf("medida=%d\n", medida);
+	texto = (char*)malloc(sizeof(char) * medida);
+	printf("texto=%s\n",texto);
+	al_fread(mapa, texto, medida);
+	
+	//mat[M][N] = leerarchivo[M][N]
 	for (i = 0; i < M; i++)
 	{
 		for (j = 0; j < N; j++)
 		{
-			if (mat[i][j] == x)
+			if (mat[i][j] == 'x')
 			{
 				al_draw_bitmap(al_load_bitmap("datos/imagenes/pared.png"),i*16,j*12,0);
 			}
-			if (mat[i][j] == p)
+			if (mat[i][j] == 'p')
 			{
 				al_draw_bitmap(al_load_bitmap("datos/imagenes/hola.png"), i * 16, j * 12, 0);
 			}
