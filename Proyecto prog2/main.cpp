@@ -9,7 +9,6 @@
 #define M 64
 #define N 64
 
-void cargarmapa(struct posicion);
 int puntaje(int mat[M][N]);//funcion para el puntaje
 
 struct posicion
@@ -18,6 +17,9 @@ struct posicion
 	int posicionY = 0;
 };
 typedef posicion movimiento;
+
+int cargarmapa(movimiento jugador);
+int cargarpared(movimiento pared);
 using namespace std;
 
 int mat[M][N];
@@ -28,7 +30,7 @@ ALLEGRO_EVENT_QUEUE* event_queue;
 
 int main()
 {
-	movimiento jugador; /*movimiento jugador en posiciones X e Y*/
+	movimiento jugador,pared; /*movimiento jugador en posiciones X e Y*/
 
 
 
@@ -47,25 +49,29 @@ int main()
 	event_queue = al_create_event_queue();
 	al_register_event_source(event_queue, al_get_keyboard_event_source());
 
-	ALLEGRO_BITMAP* menu_null = al_load_bitmap("datos/imagenes/pared.png");/*imagenes a utilizar*/
-	ALLEGRO_BITMAP* menu_null1 = al_load_bitmap("datos/imagenes/hola.png");
+	ALLEGRO_BITMAP* bloque = al_load_bitmap("datos/imagenes/pared.png");/*imagenes a utilizar*/
+	ALLEGRO_BITMAP* player = al_load_bitmap("datos/imagenes/personaje.png");
 	/*ALLEGRO_BITMAP* menu_null1 = al_load_bitmap("imagenes/cara_benja.PNG"); */
 	
 	ALLEGRO_KEYBOARD_STATE* state{};
 
-	cargarmapa(jugador);//funcion para cargar mapa 
-
+	cargarmapa(jugador);//funcion para cargar mapa ¿se devuelven los datos?
+	cargarpared(pared);
 	while (true)
 	{
 		ALLEGRO_EVENT evento;
-		/*al_clear_to_color(al_map_rgb(0, 0, 0));*/
-		/*al_draw_bitmap(menu_null, 0, 0, 0);*//*primera imagen*/
-		
+		//al_clear_to_color(al_map_rgb(0, 0, 0));
+		//al_draw_bitmap(menu_null, 0, 0, 0);/*primera imagen*/
+
+		//al_draw_bitmap(al_load_bitmap("datos/imagenes/personaje.png"), jugador.posicionX * 16, jugador.posicionY * 12, 0);
+		al_draw_bitmap(bloque, pared.posicionX, pared.posicionY, 0);
+		//al_draw_bitmap(al_load_bitmap("datos/imagenes/pared.png"), i * 16, j * 12, 0);
+		al_draw_bitmap(player, jugador.posicionX , jugador.posicionY , 0); /*personaje*/
 
 		al_flip_display();/*mostrar las imagenes en pantalla*/
 		al_wait_for_event(event_queue, &evento);
 
-		al_draw_bitmap(menu_null1, jugador.posicionX, jugador.posicionY, 0); /*personaje*/
+		
 		
 		if (evento.type == ALLEGRO_EVENT_KEY_DOWN)
 		{
@@ -73,22 +79,22 @@ int main()
 				{
 				case ALLEGRO_KEY_D:
 				{
-					jugador.posicionX = jugador.posicionX + 12;
+					jugador.posicionX = jugador.posicionX + 16;
 					break;
 				}
 				case ALLEGRO_KEY_A: 
 				{
-					jugador.posicionX = jugador.posicionX - 12;
+					jugador.posicionX = jugador.posicionX - 16;
 					break;
 				}
 				case ALLEGRO_KEY_W:
 				{
-					jugador.posicionY = jugador.posicionY - 16;
+					jugador.posicionY = jugador.posicionY - 12;
 					break;
 				}
 				case ALLEGRO_KEY_S:
 				{
-					jugador.posicionY = jugador.posicionY + 16;
+					jugador.posicionY = jugador.posicionY + 12;
 					break;
 				}
 				case ALLEGRO_KEY_ESCAPE:
@@ -102,20 +108,14 @@ int main()
 	}
 	return 0;
 }
-void cargarmapa(struct posicion)
+int cargarmapa(movimiento jugador)
 {
-		
-	typedef posicion movimiento;
-
 	int i=0, j=0;
-	char texto[M][N]{};
 
 	FILE* mapa;
 
 	mapa = fopen("datos/mapas/mapa1.txt", "r");
 	
-	movimiento jugador;
-
 	for (i = 0; i < M; i++)
 	{
 		for (j = 0; j < N; j++)
@@ -131,32 +131,50 @@ void cargarmapa(struct posicion)
 		{
 			
 			//printf("%c", mat[i][j]);
-			struct posicion
-			{
-				int posicionX = i * 16;
-				int posicionY = j * 12;
-
-			};
-			if (mat[i][j] == 'x')
-			{
-				al_draw_bitmap(al_load_bitmap("datos/imagenes/pared.png"),  jugador.posicionX, j * jugador.posicionY, 0);
-			}
 			if (mat[i][j] == 'p')
 			{
-				//printf("se encontro p = [%d][%d]\n",i,j);
-				al_draw_bitmap(al_load_bitmap("datos/imagenes/personaje.png"), i* jugador.posicionX, j* jugador.posicionY, 0);
+				jugador.posicionX = i * 16;
+				jugador.posicionY = j * 12;
+				
 			}
 		}
-		//printf("\n");
+		
 	}
-	printf("matriz\n");
+	return jugador.posicionX,jugador.posicionY;
+}
+int cargarpared(movimiento pared)
+{
+	int i = 0, j = 0;
+
+	FILE* mapa;
+
+	mapa = fopen("datos/mapas/mapa1.txt", "r");
+
 	for (i = 0; i < M; i++)
 	{
 		for (j = 0; j < N; j++)
 		{
-			printf("%c", mat[i][j]);
+			fscanf(mapa, "%c", &mat[i][j]);
 		}
-		printf("\n");
+		//fscanf(mapa, "\n");
 	}
+	fclose(mapa);
+	for (i = 0; i < M; i++)
+	{
+		for (j = 0; j < N; j++)
+		{
+
+			//printf("%c", mat[i][j]);
+
+			if (mat[i][j] == 'x')
+			{
+
+				pared.posicionX;
+				pared.posicionY;
+			}
+
+		}
+	}
+		return pared.posicionX, pared.posicionY;//mat[i][j]
 }
 
