@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <string.h>
 #include <allegro5/allegro.h>
 #include <allegro5/allegro_primitives.h>
 #include <allegro5/allegro_image.h>
@@ -8,7 +9,8 @@
 #define M 64
 #define N 64
 
-void cargarmapa(int mat[M][N]);
+void cargarmapa(struct posicion);
+int puntaje(int mat[M][N]);//funcion para el puntaje
 
 struct posicion
 {
@@ -51,40 +53,42 @@ int main()
 	
 	ALLEGRO_KEYBOARD_STATE* state{};
 
+	cargarmapa(jugador);//funcion para cargar mapa 
+
 	while (true)
 	{
 		ALLEGRO_EVENT evento;
 		/*al_clear_to_color(al_map_rgb(0, 0, 0));*/
 		/*al_draw_bitmap(menu_null, 0, 0, 0);*//*primera imagen*/
-		/*al_draw_bitmap(menu_null1, jugador.posicionX, jugador.posicionY, 0); *//*segunda imagen*/
-		cargarmapa(mat);
-		
-		al_flip_display();/*mostrar las imagenes en pantalla*/
-		al_wait_for_event(event_queue, &evento);
 		
 
+		al_flip_display();/*mostrar las imagenes en pantalla*/
+		al_wait_for_event(event_queue, &evento);
+
+		al_draw_bitmap(menu_null1, jugador.posicionX, jugador.posicionY, 0); /*personaje*/
+		
 		if (evento.type == ALLEGRO_EVENT_KEY_DOWN)
 		{
 			switch (evento.keyboard.keycode)/*hacer una accion para cada tecla pulsada*/
 				{
 				case ALLEGRO_KEY_D:
 				{
-					jugador.posicionX = jugador.posicionX + 30;
+					jugador.posicionX = jugador.posicionX + 12;
 					break;
 				}
 				case ALLEGRO_KEY_A: 
 				{
-					jugador.posicionX = jugador.posicionX - 30;
+					jugador.posicionX = jugador.posicionX - 12;
 					break;
 				}
 				case ALLEGRO_KEY_W:
 				{
-					jugador.posicionY = jugador.posicionY - 30;
+					jugador.posicionY = jugador.posicionY - 16;
 					break;
 				}
 				case ALLEGRO_KEY_S:
 				{
-					jugador.posicionY = jugador.posicionY + 30;
+					jugador.posicionY = jugador.posicionY + 16;
 					break;
 				}
 				case ALLEGRO_KEY_ESCAPE:
@@ -98,37 +102,61 @@ int main()
 	}
 	return 0;
 }
-void cargarmapa(int mat[M][N])
+void cargarmapa(struct posicion)
 {
-	int i, j;
-	char* texto;
-	long medida;
-	
-	ALLEGRO_FILE* mapa ;
-	mapa = al_fopen("datos/mapas/mapa1.txt", "r");
+		
+	typedef posicion movimiento;
 
-	al_fseek(mapa, 0, SEEK_END);
-	medida = al_ftell(mapa);
-	printf("medida=%d\n", medida);
-	texto = (char*)malloc(sizeof(char) * medida);
-	printf("texto=%s\n",texto);
-	al_fread(mapa, texto, medida);
+	int i=0, j=0;
+	char texto[M][N]{};
+
+	FILE* mapa;
+
+	mapa = fopen("datos/mapas/mapa1.txt", "r");
 	
-	//mat[M][N] = leerarchivo[M][N]
+	movimiento jugador;
+
 	for (i = 0; i < M; i++)
 	{
 		for (j = 0; j < N; j++)
 		{
+			fscanf(mapa, "%c", &mat[i][j]);
+		}
+		//fscanf(mapa, "\n");
+	}
+	fclose(mapa);
+	for (i = 0; i < M; i++)
+	{
+		for (j = 0; j < N; j++)
+		{
+			
+			//printf("%c", mat[i][j]);
+			struct posicion
+			{
+				int posicionX = i * 16;
+				int posicionY = j * 12;
+
+			};
 			if (mat[i][j] == 'x')
 			{
-				al_draw_bitmap(al_load_bitmap("datos/imagenes/pared.png"),i*16,j*12,0);
+				al_draw_bitmap(al_load_bitmap("datos/imagenes/pared.png"),  jugador.posicionX, j * jugador.posicionY, 0);
 			}
 			if (mat[i][j] == 'p')
 			{
-				al_draw_bitmap(al_load_bitmap("datos/imagenes/hola.png"), i * 16, j * 12, 0);
+				//printf("se encontro p = [%d][%d]\n",i,j);
+				al_draw_bitmap(al_load_bitmap("datos/imagenes/personaje.png"), i* jugador.posicionX, j* jugador.posicionY, 0);
 			}
 		}
+		//printf("\n");
 	}
-
+	printf("matriz\n");
+	for (i = 0; i < M; i++)
+	{
+		for (j = 0; j < N; j++)
+		{
+			printf("%c", mat[i][j]);
+		}
+		printf("\n");
+	}
 }
 
