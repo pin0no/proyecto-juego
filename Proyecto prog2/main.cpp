@@ -16,10 +16,16 @@ struct posicion
 	int posicionX = 0;
 	int posicionY = 0;
 };
+struct muro
+{
+	int posicionX = 0;
+	int posicionY = 0;
+};
 typedef posicion movimiento;
 
 int cargarmapa(movimiento jugador);
-int cargarpared(movimiento pared);
+int cargarpared(muro pared[M][N]);
+
 using namespace std;
 
 int mat[M][N];
@@ -30,9 +36,10 @@ ALLEGRO_EVENT_QUEUE* event_queue;
 
 int main()
 {
-	movimiento jugador,pared; /*movimiento jugador en posiciones X e Y*/
-
-
+	movimiento jugador; /*movimiento jugador en posiciones X e Y*/
+	struct muro pared[M][N];
+	
+	int i=0, j=0;
 
 	al_init();			/*iniciaciones*/
 	al_install_keyboard();
@@ -56,17 +63,33 @@ int main()
 	ALLEGRO_KEYBOARD_STATE* state{};
 
 	cargarmapa(jugador);//funcion para cargar mapa ¿se devuelven los datos?
+	printf("datos jugador\n");
+	printf("posicionX = %d\tposicionY = %d\n", jugador.posicionX, jugador.posicionY);
+
 	cargarpared(pared);
+	printf("paredes\n");
+	//for (i = 0; i < M; i++)
+	{
+	//	for (j = 0; j < N; j++)
+		{
+			//al_draw_bitmap(bloque, pared[i][j].posicionX * 16, pared[i][j].posicionY * 12, 0);
+			printf("i = %d\t j = %d\n", i, j);
+			printf("posicionX = %d\tposicionY = %d\n", pared[i][j].posicionX, pared[i][j].posicionY);
+		}
+	}
 	while (true)
 	{
 		ALLEGRO_EVENT evento;
-		//al_clear_to_color(al_map_rgb(0, 0, 0));
+		al_clear_to_color(al_map_rgb(0, 0, 0));
 		//al_draw_bitmap(menu_null, 0, 0, 0);/*primera imagen*/
 
 		//al_draw_bitmap(al_load_bitmap("datos/imagenes/personaje.png"), jugador.posicionX * 16, jugador.posicionY * 12, 0);
-		al_draw_bitmap(bloque, pared.posicionX, pared.posicionY, 0);
+		
+		
 		//al_draw_bitmap(al_load_bitmap("datos/imagenes/pared.png"), i * 16, j * 12, 0);
 		al_draw_bitmap(player, jugador.posicionX , jugador.posicionY , 0); /*personaje*/
+		//printf("jugador\n");
+		//printf("posicionX = %d\tposicionY = %d\n", jugador.posicionX, jugador.posicionY);
 
 		al_flip_display();/*mostrar las imagenes en pantalla*/
 		al_wait_for_event(event_queue, &evento);
@@ -133,16 +156,18 @@ int cargarmapa(movimiento jugador)
 			//printf("%c", mat[i][j]);
 			if (mat[i][j] == 'p')
 			{
-				jugador.posicionX = i * 16;
+				jugador.posicionX = i * 16 ;
 				jugador.posicionY = j * 12;
-				
+				printf("datos jugador funcion\n");
+				printf("posicionX = %d\tposicionY = %d\n", jugador.posicionX, jugador.posicionY);
+
+				return jugador.posicionX,jugador.posicionY;
 			}
 		}
-		
 	}
-	return jugador.posicionX,jugador.posicionY;
+	return 0;
 }
-int cargarpared(movimiento pared)
+int cargarpared(muro pared[M][N])
 {
 	int i = 0, j = 0;
 
@@ -159,6 +184,7 @@ int cargarpared(movimiento pared)
 		//fscanf(mapa, "\n");
 	}
 	fclose(mapa);
+	printf("paredes funcion\n");
 	for (i = 0; i < M; i++)
 	{
 		for (j = 0; j < N; j++)
@@ -168,13 +194,27 @@ int cargarpared(movimiento pared)
 
 			if (mat[i][j] == 'x')
 			{
-
-				pared.posicionX;
-				pared.posicionY;
+				//printf("mat[i][j] = %c\n", mat[i][j]);
+				//printf("i = %d\t j = %d\n", i, j);
+				
+				pared[i][j].posicionX = i;
+				pared[i][j].posicionY = j;
+				//printf("posicionX = %d\tposicionY = %d\n", pared[i][j].posicionX, pared[i][j].posicionY);
 			}
 
 		}
+	} 
+	for (i = 0; i < M; i++)
+	{
+		for (j = 0; j < N; j++)
+		{
+			if (mat[i][j] == 'x')
+			{
+				printf("i = %d\t j = %d\n", i, j);
+				return pared[i][j].posicionX, pared[i][j].posicionY;
+			}
+		}
 	}
-		return pared.posicionX, pared.posicionY;//mat[i][j]
+	
 }
 
