@@ -50,7 +50,7 @@ int main()
 	zombies enemigo;
 	struct muro pared;
 	
-	int i=0, j=0;
+	int i=0, j=0,cont=0;
 
 	al_init();			/*iniciaciones*/
 	al_install_keyboard();
@@ -74,6 +74,8 @@ int main()
 	/*ALLEGRO_BITMAP* menu_null1 = al_load_bitmap("imagenes/cara_benja.PNG"); */
 	
 	ALLEGRO_KEYBOARD_STATE* state{};
+
+	ALLEGRO_TIMER* seg = al_create_timer(1.0);
 
 	jugador = cargarmapa();//funcion para cargar mapa
 	enemigo = cargarenemigo();
@@ -138,7 +140,7 @@ int main()
 				default:
 					break;
 				}
-			
+
 
 			for (i = 1; i < MAX; i++)
 			{
