@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <string.h>
+#include <time.h>
 #include <allegro5/allegro.h>
 #include <allegro5/allegro_primitives.h>
 #include <allegro5/allegro_image.h>
@@ -43,6 +44,8 @@ ALLEGRO_EVENT_QUEUE* event_queue;
 
 int main()
 {
+	srand(time(0));
+
 	movimiento jugador;/*movimiento jugador en posiciones X e Y*/
 	zombies enemigo;
 	struct muro pared;
@@ -135,10 +138,38 @@ int main()
 				default:
 					break;
 				}
+			
+
+			for (i = 1; i < MAX; i++)
+			{
+				j = 1 + rand() % 4;
+				if (j == 1)
+				{
+					enemigo.posicionX[i] = enemigo.posicionX[i] +  16;
+					enemigo.posicionY[i] = enemigo.posicionY[i] +  12;
+				}
+				if (j == 2)
+				{
+					enemigo.posicionX[i] = enemigo.posicionX[i] -  16;
+					enemigo.posicionY[i] = enemigo.posicionY[i] -  12;
+				}
+				if (j == 3)
+				{
+					enemigo.posicionX[i] = enemigo.posicionX[i] +  16;
+					enemigo.posicionY[i] = enemigo.posicionY[i] -  12;
+				}
+				if (j == 4)
+				{
+					enemigo.posicionX[i] = enemigo.posicionX[i] -  16;
+					enemigo.posicionY[i] = enemigo.posicionY[i] +  12;
+				}
+			}
+
 		}
 	}
 	return 0;
 }
+
 movimiento cargarmapa()
 {
 	movimiento jugador;
@@ -208,7 +239,6 @@ zombies cargarenemigo()
 	}
 	return enemigo;
 }
-
 
 struct muro cargarpared()
 {
