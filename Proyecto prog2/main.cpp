@@ -4,13 +4,15 @@
 #include <allegro5/allegro.h>
 #include <allegro5/allegro_primitives.h>
 #include <allegro5/allegro_image.h>
+#include <allegro5/allegro_font.h>
 #include <Windows.h>
 #define ancho 1024
 #define alto 768
 #define M 64
 #define N 64
 #define MAX 5
-int puntaje(int mat[M][N]);//funcion para el puntaje
+#define MAXELEM 5
+int puntaje(int puntos);//funcion para el puntaje
 
 struct posicion
 {
@@ -31,7 +33,8 @@ struct enemy
 typedef struct posicion movimiento;
 typedef struct enemy zombies ;
 movimiento cargarmapa();
-zombies cargarenemigo();
+movimiento cargarelementos(int index);
+zombies cargarenemigo(int index);
 struct muro cargarpared();
 
 using namespace std;
@@ -46,15 +49,16 @@ int main()
 {
 	srand(time(0));
 
-	movimiento jugador;/*movimiento jugador en posiciones X e Y*/
+	movimiento jugador,elemento[MAXELEM];/*movimiento jugador en posiciones X e Y*/
 	zombies enemigo[MAX];
 	struct muro pared;
 	
-	int i=0, j=0,cont=0;
+	int i=0, j=0,cont=0,puntos;
 
 	al_init();			/*iniciaciones*/
 	al_install_keyboard();
 	al_init_image_addon();
+	al_init_font_addon();
 	
 	ALLEGRO_DISPLAY* ventana = al_create_display(ancho, alto);/*crear una ventana*/
 
@@ -71,8 +75,13 @@ int main()
 	ALLEGRO_BITMAP* player = al_load_bitmap("datos/imagenes/personaje.png");
 	ALLEGRO_BITMAP* fondo = al_load_bitmap("datos/imagenes/cesped.jpg");
 	ALLEGRO_BITMAP* zombi = al_load_bitmap("datos/imagenes/fantasma.png");
+	ALLEGRO_BITMAP* objeto = al_load_bitmap("datos/imagenes/corazon.jpg");
 	/*ALLEGRO_BITMAP* menu_null1 = al_load_bitmap("imagenes/cara_benja.PNG"); */
+
+	ALLEGRO_FONT* letras = al_load_font("datos/fuentes/AldotheApache.ttf",40,0);
 	
+	ALLEGRO_COLOR negro = al_map_rgb(0, 0, 0);
+
 	ALLEGRO_KEYBOARD_STATE* state{};
 
 	ALLEGRO_TIMER* seg = al_create_timer(1.0);
@@ -81,10 +90,14 @@ int main()
 
 	for (i = 0; i < MAX; i++)
 	{
-		enemigo[i] = cargarenemigo();
+		enemigo[i] = cargarenemigo(i);
 	}
 	
-	
+	for (i = 0; i < MAXELEM; i++)
+	{
+		elemento[i] = cargarelementos(i);
+	}
+
 	pared = cargarpared();
 	
 	while (true)
@@ -100,15 +113,35 @@ int main()
 				al_draw_bitmap(bloque, pared.posicionX[i][j], pared.posicionY[i][j], 0);//bloques
 			}
 		}
+		//printf("\n\tENEMIGOS");
 		for (i = 0; i < MAX; i++)
 		{
-			printf("\ni == %d", i);
-			printf("\nenemigo[i].posicionX = %d\n", enemigo[i].posicionX);
-			printf("\nenemigo[i].posicionY = %d\n", enemigo[i].posicionY);
 			al_draw_bitmap(zombi, enemigo[i].posicionX, enemigo[i].posicionY, 0);//enemigo
+			//printf("\ni==[%d]\nenemigo[i].posicionX == %d\tenemigo[i].posicionY == %d", i, enemigo[i].posicionX, enemigo[i].posicionY);
 		}
-
+		
+		//printf("\n\tOBJETOS");
+		for (i = 0; i < MAXELEM; i++)
+		{
+			al_draw_bitmap(objeto, elemento[i].posicionX, elemento[i].posicionY, 0);
+			//printf("\ni==[%d]\nelemento[i].posicionX == %d\telemento[i].posicionY == %d", i, elemento[i].posicionX, elemento[i].posicionY);
+		}
+		//	printf("i == %d\n", i);
+		
 		al_draw_bitmap(player, jugador.posicionX, jugador.posicionY, 0); /*personaje*/
+		
+		for (i = 0; i < MAXELEM; i++)
+		{
+			if (jugador.posicionX == elemento[i].posicionX && jugador.posicionY == elemento[i].posicionY)
+			{
+			//	puntos = puntaje(puntos);
+				elemento[i].posicionX = -30;//intentar cambiarlo 
+				elemento[i].posicionY = -30;
+			}
+		}
+		
+		al_draw_text(letras,negro,0,0,0,"hola");
+		
 
 		//printf("jugador\n");
 		//printf("posicionX = %d\tposicionY = %d\n", jugador.posicionX, jugador.posicionY);
@@ -217,7 +250,7 @@ movimiento cargarmapa()
 	
 }
 
-zombies cargarenemigo()
+zombies cargarenemigo(int index)
 {
 	zombies enemigo[MAX];
 	int i = 0, j = 0,cont = 0;
@@ -245,18 +278,46 @@ zombies cargarenemigo()
 			{
 				enemigo[cont].posicionX = i * 16;
 				enemigo[cont].posicionY = j * 12;
-				printf("i == %d\tj == %dt", i, j);
-				printf("cont == %d", cont);
-				printf("\nenemigo[cont].posicionX = %d\n", enemigo[cont].posicionX);
-				printf("\nenemigo[cont].posicionY = %d\n", enemigo[cont].posicionY);
 				cont++;
-				
 			}
 			
 		}
 	}
-	cont--;
-	return enemigo[cont];
+	return enemigo[index];
+}
+
+movimiento cargarelementos(int index)
+{
+	movimiento elemento[MAXELEM];
+	int i = 0, j = 0,cont=0;
+
+	FILE* mapa;
+
+	mapa = fopen("datos/mapas/mapa1.txt", "r");
+
+	for (i = 0; i < M; i++)
+	{
+		for (j = 0; j < N; j++)
+		{
+			fscanf(mapa, "%c", &mat[i][j]);
+		}
+	}
+
+	fclose(mapa);
+
+	for (i = 0; i < M; i++)
+	{
+		for (j = 0; j < N; j++)
+		{
+			if (mat[i][j] == 'v' && cont <MAXELEM)
+			{
+				elemento[cont].posicionX = i * 16;
+				elemento[cont].posicionY = j * 12;
+				cont++;
+			}
+		}
+	}
+	return elemento[index];
 }
 
 struct muro cargarpared()
@@ -296,8 +357,9 @@ struct muro cargarpared()
 	return pared;
 }
 
-int puntaje(int mat[M][N])
+int puntaje(int puntos)
 {
+
 	return 0;
 }
 

@@ -17,13 +17,13 @@ x             e                                               x
 x                                  e                          x
 x                                                             x
 x                                                             x
+x                                       v                     x
 x                                                             x
 x                                                             x
+x                               p v    v                      x
 x                                                             x
-x                               p                             x
-x                                                             x
-x                                                             x
-x                                                             x
+x                               v                             x
+x                                   v                         x
 x                                                             x
 x                                                             x
 x                   e                                         x
