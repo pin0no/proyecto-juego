@@ -22,14 +22,14 @@ struct muro
 	int posicionX[M][N];
 	int posicionY[M][N];
 };
-struct enemy
+struct enemy 
 {
-	int posicionX[MAX];
-	int posicionY[MAX];
+	int posicionX=0;
+	int posicionY=0;
 };
 
 typedef struct posicion movimiento;
-typedef struct enemy zombies;
+typedef struct enemy zombies ;
 movimiento cargarmapa();
 zombies cargarenemigo();
 struct muro cargarpared();
@@ -47,7 +47,7 @@ int main()
 	srand(time(0));
 
 	movimiento jugador;/*movimiento jugador en posiciones X e Y*/
-	zombies enemigo;
+	zombies enemigo[MAX];
 	struct muro pared;
 	
 	int i=0, j=0,cont=0;
@@ -78,7 +78,13 @@ int main()
 	ALLEGRO_TIMER* seg = al_create_timer(1.0);
 
 	jugador = cargarmapa();//funcion para cargar mapa
-	enemigo = cargarenemigo();
+
+	for (i = 0; i < MAX; i++)
+	{
+		enemigo[i] = cargarenemigo();
+	}
+	
+	
 	pared = cargarpared();
 	
 	while (true)
@@ -96,7 +102,10 @@ int main()
 		}
 		for (i = 0; i < MAX; i++)
 		{
-			al_draw_bitmap(zombi, enemigo.posicionX[i], enemigo.posicionY[i], 0);//enemigo
+			printf("\ni == %d", i);
+			printf("\nenemigo[i].posicionX = %d\n", enemigo[i].posicionX);
+			printf("\nenemigo[i].posicionY = %d\n", enemigo[i].posicionY);
+			al_draw_bitmap(zombi, enemigo[i].posicionX, enemigo[i].posicionY, 0);//enemigo
 		}
 
 		al_draw_bitmap(player, jugador.posicionX, jugador.posicionY, 0); /*personaje*/
@@ -142,28 +151,29 @@ int main()
 				}
 
 
-			for (i = 1; i < MAX; i++)
+			for (i = 0; i < MAX; i++)
 			{
+				
 				j = 1 + rand() % 4;
 				if (j == 1)
 				{
-					enemigo.posicionX[i] = enemigo.posicionX[i] +  16;
-					enemigo.posicionY[i] = enemigo.posicionY[i] +  12;
+					enemigo[i].posicionX = enemigo[i].posicionX + 16;
+					enemigo[i].posicionY = enemigo[i].posicionY + 12;
 				}
 				if (j == 2)
 				{
-					enemigo.posicionX[i] = enemigo.posicionX[i] -  16;
-					enemigo.posicionY[i] = enemigo.posicionY[i] -  12;
+					enemigo[i].posicionX = enemigo[i].posicionX - 16;
+					enemigo[i].posicionY = enemigo[i].posicionY - 12;
 				}
 				if (j == 3)
 				{
-					enemigo.posicionX[i] = enemigo.posicionX[i] +  16;
-					enemigo.posicionY[i] = enemigo.posicionY[i] -  12;
+					enemigo[i].posicionX = enemigo[i].posicionX + 16;
+					enemigo[i].posicionY = enemigo[i].posicionY - 12;
 				}
 				if (j == 4)
 				{
-					enemigo.posicionX[i] = enemigo.posicionX[i] -  16;
-					enemigo.posicionY[i] = enemigo.posicionY[i] +  12;
+					enemigo[i].posicionX = enemigo[i].posicionX - 16;
+					enemigo[i].posicionY = enemigo[i].posicionY + 12;
 				}
 			}
 
@@ -209,7 +219,7 @@ movimiento cargarmapa()
 
 zombies cargarenemigo()
 {
-	zombies enemigo;
+	zombies enemigo[MAX];
 	int i = 0, j = 0,cont = 0;
 
 	FILE* mapa;
@@ -231,15 +241,22 @@ zombies cargarenemigo()
 		{
 
 			//printf("%c", mat[i][j]);
-			if (mat[i][j] == 'e' && cont < MAX)
+			if (mat[i][j] == 'e' && cont <= MAX)
 			{
-				enemigo.posicionX[cont] = i * 16;
-				enemigo.posicionY[cont] = j * 12;
+				enemigo[cont].posicionX = i * 16;
+				enemigo[cont].posicionY = j * 12;
+				printf("i == %d\tj == %dt", i, j);
+				printf("cont == %d", cont);
+				printf("\nenemigo[cont].posicionX = %d\n", enemigo[cont].posicionX);
+				printf("\nenemigo[cont].posicionY = %d\n", enemigo[cont].posicionY);
 				cont++;
+				
 			}
+			
 		}
 	}
-	return enemigo;
+	cont--;
+	return enemigo[cont];
 }
 
 struct muro cargarpared()
@@ -279,5 +296,8 @@ struct muro cargarpared()
 	return pared;
 }
 
-
+int puntaje(int mat[M][N])
+{
+	return 0;
+}
 
