@@ -5,6 +5,7 @@
 #include <allegro5/allegro_primitives.h>
 #include <allegro5/allegro_image.h>
 #include <allegro5/allegro_font.h>
+#include <allegro5/allegro_ttf.h>
 #include <Windows.h>
 #define ancho 1024
 #define alto 768
@@ -49,24 +50,26 @@ int main()
 {
 	srand(time(0));
 
-	movimiento jugador,elemento[MAXELEM];/*movimiento jugador en posiciones X e Y*/
+	movimiento jugador, elemento[MAXELEM];/*movimiento jugador en posiciones X e Y*/
 	zombies enemigo[MAX];
 	struct muro pared;
-	
-	int i=0, j=0,cont=0,puntos;
+
+	int i = 0, j = 0, cont = 0, puntos = 0;
 
 	al_init();			/*iniciaciones*/
 	al_install_keyboard();
 	al_init_image_addon();
 	al_init_font_addon();
-	
+	al_init_ttf_addon();
+	al_init_primitives_addon();
+
 	ALLEGRO_DISPLAY* ventana = al_create_display(ancho, alto);/*crear una ventana*/
 
 	int ANCHO_W = GetSystemMetrics(SM_CXSCREEN);/*obtener los pixeles de la pantalla que se utiliza*/
 	int ALTO_W = GetSystemMetrics(SM_CYSCREEN);
 
 	al_set_window_title(ventana, "primer avance");/*cambio de titulo*/
-	al_set_window_position(ventana, ANCHO_W/2-ancho/2, ALTO_W/2-alto/2);/*centrar la ventana*/
+	//al_set_window_position(ventana, ANCHO_W/2-ancho/2, ALTO_W/2-alto/2);/*centrar la ventana*/
 
 	event_queue = al_create_event_queue();
 	al_register_event_source(event_queue, al_get_keyboard_event_source());
@@ -78,9 +81,10 @@ int main()
 	ALLEGRO_BITMAP* objeto = al_load_bitmap("datos/imagenes/corazon.jpg");
 	/*ALLEGRO_BITMAP* menu_null1 = al_load_bitmap("imagenes/cara_benja.PNG"); */
 
-	ALLEGRO_FONT* letras = al_load_font("datos/fuentes/AldotheApache.ttf",40,0);
+	ALLEGRO_FONT* letras = al_load_font("datos/fuentes/AldotheApache.ttf",50,0);
 	
 	ALLEGRO_COLOR negro = al_map_rgb(0, 0, 0);
+	ALLEGRO_COLOR blanco = al_map_rgb(255, 255, 255);
 
 	ALLEGRO_KEYBOARD_STATE* state{};
 
@@ -134,14 +138,13 @@ int main()
 		{
 			if (jugador.posicionX == elemento[i].posicionX && jugador.posicionY == elemento[i].posicionY)
 			{
-			//	puntos = puntaje(puntos);
+				puntos = puntaje(puntos);
 				elemento[i].posicionX = -30;//intentar cambiarlo 
 				elemento[i].posicionY = -30;
 			}
 		}
-		
-		al_draw_text(letras,negro,0,0,0,"hola");
-		
+		al_draw_rectangle(ancho-16 , 12*4,ancho-16*7,12*2, blanco, 30);
+		al_draw_textf(letras, negro, ANCHO_W / 2 - 16 * 3, 12, NULL, "%d", puntos);
 
 		//printf("jugador\n");
 		//printf("posicionX = %d\tposicionY = %d\n", jugador.posicionX, jugador.posicionY);
@@ -359,7 +362,7 @@ struct muro cargarpared()
 
 int puntaje(int puntos)
 {
-
-	return 0;
+	puntos = puntos + 300;
+	return puntos;
 }
 
