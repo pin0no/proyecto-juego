@@ -51,6 +51,9 @@ int mat[M][N];
 
 ALLEGRO_EVENT_QUEUE* event_queue;
 
+ALLEGRO_SAMPLE* musica = NULL;
+ALLEGRO_SAMPLE_INSTANCE* songinstance = NULL;
+
 int main()
 {
 	srand(time(0));
@@ -59,9 +62,9 @@ int main()
 	zombies enemigo[MAX];
 	struct muro pared;
 
-	int i = 0, j = 0, cont = 0, puntos = 0,contenemigos=0;
-	int x=0, y=0, bandera=0,gmrv;
-	int corazones=3;
+	int i = 0, j = 0, cont = 0, puntos = 0, contenemigos = 0;
+	int x = 0, y = 0, bandera = 0, gmrv;
+	int corazones = 3;
 
 	al_init();			/*iniciaciones*/
 
@@ -86,26 +89,30 @@ int main()
 
 	event_queue = al_create_event_queue();
 	al_register_event_source(event_queue, al_get_keyboard_event_source());
-	
+
 	ALLEGRO_BITMAP* bloque = al_load_bitmap("datos/imagenes/pared.png");/*imagenes a utilizar*/
 	ALLEGRO_BITMAP* player = al_load_bitmap("datos/imagenes/personaje.png");
 	ALLEGRO_BITMAP* fondo = al_load_bitmap("datos/imagenes/cesped.jpg");
 	ALLEGRO_BITMAP* zombi = al_load_bitmap("datos/imagenes/fantasma.png");
 	ALLEGRO_BITMAP* objeto = al_load_bitmap("datos/imagenes/corazon.jpg");
 
-	ALLEGRO_FONT* letras = al_load_font("datos/fuentes/AldotheApache.ttf",50,0);
-	
+	ALLEGRO_FONT* letras = al_load_font("datos/fuentes/AldotheApache.ttf", 50, 0);
+
 	ALLEGRO_COLOR negro = al_map_rgb(0, 0, 0);
 	ALLEGRO_COLOR blanco = al_map_rgb(255, 255, 255);
 	ALLEGRO_COLOR rojo = al_map_rgb(255, 0, 0);
 
 	ALLEGRO_KEYBOARD_STATE* state{};
 
-	ALLEGRO_SAMPLE* musica = al_load_sample("datos\musica\papaya song.wav");
-	ALLEGRO_SAMPLE_ID* sample_id;
-	ALLEGRO_AUDIO_STREAM* musica1 = al_load_audio_stream("datos\musica\papaya song.wav", 4, 2048);
 
-	al_reserve_samples(1);
+	al_reserve_samples(10);
+
+	musica = al_load_sample("datos/musica/papaya song.ogg");
+
+	songinstance = al_create_sample_instance(musica);
+	al_set_sample_instance_playmode(songinstance, ALLEGRO_PLAYMODE_LOOP);
+
+	al_attach_sample_instance_to_mixer(songinstance, al_get_default_mixer());
 
 	jugador = cargarmapa();//funcion para cargar mapa
 	x = jugador.posicionX;
@@ -123,10 +130,17 @@ int main()
 	pared = cargarpared();
 
 	ALLEGRO_EVENT evento;
+
+	al_play_sample_instance(songinstance);
 	
 	while (true)
 	{
 		if (bandera == 0)
+		{
+
+			bandera = 1;
+		}
+		if (bandera == 1)
 		{
 			al_clear_to_color(al_map_rgb(0, 0, 0));
 
@@ -151,13 +165,13 @@ int main()
 
 
 			al_draw_bitmap(player, jugador.posicionX, jugador.posicionY, 0); /*personaje*/
-			if (jugador.posicionX > ancho)
+			if (jugador.posicionX > ancho-1)
 			{
 				jugador.posicionX = 0;
 			}
-			if (jugador.posicionX < 0)
+			if (jugador.posicionX < -1)
 			{
-				jugador.posicionX = ancho;
+				jugador.posicionX = ancho-16;
 			}
 			for (i = 0; i < MAXELEM; i++)//suma de puntaje
 			{
@@ -177,7 +191,7 @@ int main()
 					jugador.posicionY = y;
 					if (corazones == 0)
 					{
-						bandera = 1;
+						bandera = 2;
 					}
 				}
 			}
@@ -216,13 +230,17 @@ int main()
 				}
 				case ALLEGRO_KEY_ESCAPE:
 				{
-					al_destroy_sample(musica);
 					return 0;
 				}
 				case ALLEGRO_KEY_ENTER:
 				{
 					//al_play_sample(musica, 20.0, 0.5, 1.0, ALLEGRO_PLAYMODE_ONCE, NULL);
 					bandera = 1;
+					break;
+				}
+				case ALLEGRO_KEY_0:
+				{
+					al_stop_sample_instance(songinstance);
 					break;
 				}
 				default:
@@ -261,7 +279,7 @@ int main()
 
 			}
 		}
-		if (bandera == 1)
+		if (bandera == 2)
 		{
 			gmrv=gameover(puntos);
 			if (gmrv== 1)
