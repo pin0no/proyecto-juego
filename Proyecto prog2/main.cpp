@@ -62,7 +62,7 @@ int main()
 	zombies enemigo[MAX];
 	struct muro pared;
 
-	int i = 0, j = 0, cont = 0, puntos = 0, contenemigos = 0;
+	int i = 0, j = 0, cont = 0, puntos = 0, contenemigos = 0, movimientojugador = 0;
 	int x = 0, y = 0, bandera = 0, gmrv;
 	int corazones = 3;
 
@@ -72,7 +72,7 @@ int main()
 
 	al_init_image_addon();//imagenes
 
-	al_init_font_addon();//fuentes de letrras
+	al_init_font_addon();//fuentes de letras
 	al_init_ttf_addon();
 
 	al_init_primitives_addon();//figuras
@@ -139,6 +139,7 @@ int main()
 	{
 		if (bandera == 0)
 		{
+			al_clear_to_color(al_map_rgb(0, 0, 0));
 			al_draw_text(letras1, blanco, ancho / 2 - 16 * 6, alto / 2 + 12 * 6, NULL, "presione k para iniciar el juego  presione l para salir del juego");
 			al_flip_display();
 
@@ -161,7 +162,6 @@ int main()
 					break;
 				}
 			}
-			bandera = 1;
 		}
 		if (bandera == 1)
 		{
@@ -186,7 +186,6 @@ int main()
 				al_draw_bitmap(objeto, elemento[i].posicionX, elemento[i].posicionY, 0);
 			}
 
-
 			al_draw_bitmap(player, jugador.posicionX*16, jugador.posicionY*12, 0); /*personaje*/
 			if (jugador.posicionX*16 > ancho-1)
 			{
@@ -197,8 +196,6 @@ int main()
 				jugador.posicionX = ancho-16;
 			}
 
-			
-
 			for (i = 0; i < MAXELEM; i++)//suma de puntaje
 			{
 				if (jugador.posicionX*16 == elemento[i].posicionX && jugador.posicionY *12== elemento[i].posicionY)
@@ -208,6 +205,7 @@ int main()
 					elemento[i].posicionY = -30;
 				}
 			}
+
 			for (i = 0; i < MAXELEM; i++)
 			{
 				if (jugador.posicionX*16 == enemigo[i].posicionX * 16 && jugador.posicionY*12 == enemigo[i].posicionY * 12)
@@ -217,10 +215,72 @@ int main()
 					jugador.posicionY = y;
 					if (corazones == 0)
 					{
+						al_destroy_bitmap(bloque);
+						al_destroy_bitmap(player);
+						al_destroy_bitmap(fondo);
+						al_destroy_bitmap(zombi);
+						al_destroy_bitmap(objeto);
 						bandera = 2;
 					}
 				}
 			}
+			
+			if (movimientojugador == 1)
+			{
+				contenemigos = contenemigos + 1;
+				for (i = 0; i < MAX; i++)
+				{
+					if (contenemigos % 10 == 0)
+					{
+						switch (j = 1 + rand() % 4)
+						{
+						case 1:
+						{
+							if (mat[enemigo[i].posicionX + 1][enemigo[i].posicionY] != 'x')//colision con paredes
+							{
+								enemigo[i].posicionX = enemigo[i].posicionX + 1;
+								break;
+							}
+							break;
+						}
+
+						case 2:
+						{
+							if (mat[enemigo[i].posicionX - 1][enemigo[i].posicionY] != 'x')//colision con paredes
+							{
+								enemigo[i].posicionX = enemigo[i].posicionX - 1;
+								break;
+							}
+							break;
+						}
+
+						case 3:
+						{
+							if (mat[enemigo[i].posicionX][enemigo[i].posicionY - 1] != 'x')//colision con paredes
+							{
+								enemigo[i].posicionY = enemigo[i].posicionY - 1;
+								break;
+							}
+							break;
+						}
+
+						case 4:
+						{
+							if (mat[enemigo[i].posicionX][enemigo[i].posicionY + 1] != 'x')//colision con paredes
+							{
+								enemigo[i].posicionY = enemigo[i].posicionY + 1;
+								break;
+							}
+							break;
+						}
+
+						default:
+							break;
+						}
+					}
+				}
+			}
+
 			al_draw_rectangle(ancho - 16, 12 * 4, ancho - 16 * 7, 12 * 2, blanco, 30);
 			al_draw_textf(letras, negro, ancho - 16 * 8, 12, NULL, "%d", puntos);
 			al_draw_textf(letras, rojo, ancho - 16 * 2, 12, NULL, "%d", corazones);
@@ -240,8 +300,10 @@ int main()
 					if (mat[jugador.posicionX +1][jugador.posicionY] != 'x')//colision con paredes
 					{
 						jugador.posicionX = jugador.posicionX + 1;
+						movimientojugador = 1;
 						break;
 					}
+					movimientojugador = 1;
 					break;
 				}
 				case ALLEGRO_KEY_A:
@@ -249,8 +311,10 @@ int main()
 					if (mat[jugador.posicionX -1][jugador.posicionY] != 'x')//colision con paredes
 					{
 						jugador.posicionX = jugador.posicionX - 1;
+						movimientojugador = 1;
 						break;
 					}
+					movimientojugador = 1;
 					break;
 				}
 				case ALLEGRO_KEY_W:
@@ -258,8 +322,10 @@ int main()
 					if (mat[jugador.posicionX][jugador.posicionY - 1] != 'x')//colision con paredes
 					{
 						jugador.posicionY = jugador.posicionY - 1;
+						movimientojugador = 1;
 						break;
 					}
+					movimientojugador = 1;
 					break;
 				}
 				case ALLEGRO_KEY_S:
@@ -267,10 +333,10 @@ int main()
 					if (mat[jugador.posicionX][jugador.posicionY + 1] != 'x')//colision con paredes
 					{
 						jugador.posicionY = jugador.posicionY + 1;
+						movimientojugador = 1;
 						break;
 					}
-
-					
+					movimientojugador = 1;
 					break;
 				}
 				case ALLEGRO_KEY_ESCAPE:
@@ -279,7 +345,13 @@ int main()
 				}
 				case ALLEGRO_KEY_ENTER:
 				{
-					bandera = 1;
+					al_destroy_bitmap(bloque);
+					al_destroy_bitmap(player);
+					al_destroy_bitmap(fondo);
+					al_destroy_bitmap(zombi);
+					al_destroy_bitmap(objeto);
+
+					bandera = 2;
 					break;
 				}
 				case ALLEGRO_KEY_0:
@@ -290,79 +362,15 @@ int main()
 				default:
 					break;
 				}
-
-				
-
-				contenemigos = contenemigos + 1;
-
-				for (i = 0; i < MAX; i++)
-				{
-					//if (contenemigos % 10 == 0)
-					{
-						switch (j = 1 + rand() % 4)
-						{
-						case 1:
-						{
-							if (mat[enemigo[i].posicionX + 1][enemigo[i].posicionY + 1] != 'x')//colision con paredes
-							{
-								enemigo[i].posicionX = enemigo[i].posicionX + 1;
-								enemigo[i].posicionY = enemigo[i].posicionY + 1;
-								break;
-							}
-							printf("hola");
-							break;
-						}
-
-						case 2:
-						{
-							if (mat[enemigo[i].posicionX - 1][enemigo[i].posicionY - 1] != 'x')//colision con paredes
-							{
-								enemigo[i].posicionX = enemigo[i].posicionX - 1;
-								enemigo[i].posicionY = enemigo[i].posicionY - 1;
-								break;
-							}
-							printf("hola");
-							break;
-						}
-
-						case 3:
-						{
-							if (mat[enemigo[i].posicionX + 1][enemigo[i].posicionY - 1] != 'x')//colision con paredes
-							{
-								enemigo[i].posicionX = enemigo[i].posicionX + 1;
-								enemigo[i].posicionY = enemigo[i].posicionY - 1;
-								
-								break;
-							}
-							printf("hola");
-							break;
-						}
-
-						case 4:
-						{
-							if (mat[enemigo[i].posicionX - 1][enemigo[i].posicionY + 1] != 'x')//colision con paredes
-							{
-								enemigo[i].posicionX = enemigo[i].posicionX - 1;
-								enemigo[i].posicionY = enemigo[i].posicionY + 1;
-								break;
-							}
-							printf("hola");
-							break;
-						}
-
-						default:
-							break;
-						}
-					}
-				}
-
 			}
 		}
 		if (bandera == 2)
 		{
 			gmrv=gameover(puntos);
-			if (gmrv== 1)
+			if (gmrv == 1)
 				return 0;
+			if (gmrv == 2)
+				bandera = 0;
 		}
 	}
 		
@@ -391,8 +399,6 @@ movimiento cargarmapa()
 	{
 		for (j = 0; j < N; j++)
 		{
-			
-			//printf("%c", mat[i][j]);
 			if (mat[i][j] == 'p')
 			{
 				jugador.posicionX = i ;
@@ -495,6 +501,7 @@ int gameover(int puntos)
 	al_draw_textf(letras, rojo, ancho /2-16*14, alto/4+12*3, NULL, "tus puntos fueron de :%d", puntos);
 	al_draw_text(letras, blanco, ancho / 2-16*6, alto / 5, NULL, "GAME OVER");
 	al_draw_text(letras1, blanco, ancho / 2 - 16 * 6, alto / 2 + 12 * 6, NULL, "presione escape para salir");
+	al_draw_text(letras1, blanco, ancho / 2 - 16 * 6, alto / 2 + 12 * 8, NULL, "presione enter para volver al menu");
 	al_flip_display();
 	al_wait_for_event(event_queue, &evento);
 
@@ -505,6 +512,10 @@ int gameover(int puntos)
 		case ALLEGRO_KEY_ESCAPE:
 		{
 			return 1;
+		}
+		case ALLEGRO_KEY_ENTER:
+		{
+			return 2;
 		}
 		default:
 			break;
