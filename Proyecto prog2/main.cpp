@@ -97,6 +97,8 @@ int main()
 	ALLEGRO_BITMAP* objeto = al_load_bitmap("datos/imagenes/corazon.jpg");
 
 	ALLEGRO_FONT* letras = al_load_font("datos/fuentes/AldotheApache.ttf", 50, 0);
+	ALLEGRO_FONT* letras1 = al_load_font("datos/fuentes/AldotheApache.ttf", 20, 0);
+
 
 	ALLEGRO_COLOR negro = al_map_rgb(0, 0, 0);
 	ALLEGRO_COLOR blanco = al_map_rgb(255, 255, 255);
@@ -131,13 +133,34 @@ int main()
 
 	ALLEGRO_EVENT evento;
 
-	al_play_sample_instance(songinstance);
+	//al_play_sample_instance(songinstance);
 	
 	while (true)
 	{
 		if (bandera == 0)
 		{
+			al_draw_text(letras1, blanco, ancho / 2 - 16 * 6, alto / 2 + 12 * 6, NULL, "presione k para iniciar el juego  presione l para salir del juego");
+			al_flip_display();
 
+			al_wait_for_event(event_queue, &evento);
+
+			if (evento.type == ALLEGRO_EVENT_KEY_DOWN)
+			{
+				switch (evento.keyboard.keycode)
+				{
+				case ALLEGRO_KEY_K:
+				{
+					bandera = 1;
+					break;
+				}
+				case ALLEGRO_KEY_L:
+				{
+					return 0;
+				}
+				default:
+					break;
+				}
+			}
 			bandera = 1;
 		}
 		if (bandera == 1)
@@ -173,6 +196,9 @@ int main()
 			{
 				jugador.posicionX = ancho-16;
 			}
+
+			
+
 			for (i = 0; i < MAXELEM; i++)//suma de puntaje
 			{
 				if (jugador.posicionX == elemento[i].posicionX && jugador.posicionY == elemento[i].posicionY)
@@ -200,6 +226,7 @@ int main()
 			al_draw_textf(letras, rojo, ancho - 16 * 2, 12, NULL, "%d", corazones);
 
 			al_flip_display();/*mostrar las imagenes en pantalla*/
+			
 			al_wait_for_event(event_queue, &evento);
 
 			//al_play_sample(musica, 40, 0.0, 2.0, ALLEGRO_PLAYMODE_ONCE,NULL);
@@ -210,16 +237,51 @@ int main()
 				{
 				case ALLEGRO_KEY_D:
 				{
+					for (i = 0; i < M; i++)//"colision"
+					{
+						for (j = 0; j < N; j++)
+						{
+							if (jugador.posicionX + 16 == pared.posicionX[i][j] && jugador.posicionY == pared.posicionY[i][j])
+							{
+								jugador.posicionX = jugador.posicionX - 16;
+								break;
+							}
+						}
+					}
 					jugador.posicionX = jugador.posicionX + 16;
 					break;
 				}
 				case ALLEGRO_KEY_A:
 				{
+					for (i = 0; i < M; i++)//"colision"
+					{
+						for (j = 0; j < N; j++)
+						{
+							if (jugador.posicionX - 16 == pared.posicionX[i][j] && jugador.posicionY == pared.posicionY[i][j])
+							{
+								printf("hola\n");
+								jugador.posicionX = jugador.posicionX + 16;
+								break;
+							}
+						}
+					}
 					jugador.posicionX = jugador.posicionX - 16;
 					break;
 				}
 				case ALLEGRO_KEY_W:
 				{
+					for (i = 0; i < M; i++)//"colision"
+					{
+						for (j = 0; j < N; j++)
+						{
+							if (jugador.posicionX  == pared.posicionX[i][j] && jugador.posicionY - 12 == pared.posicionY[i][j])
+							{
+								printf("hola\n");
+								jugador.posicionX = jugador.posicionX + 12;
+								break;
+							}
+						}
+					}
 					jugador.posicionY = jugador.posicionY - 12;
 					break;
 				}
@@ -234,7 +296,6 @@ int main()
 				}
 				case ALLEGRO_KEY_ENTER:
 				{
-					//al_play_sample(musica, 20.0, 0.5, 1.0, ALLEGRO_PLAYMODE_ONCE, NULL);
 					bandera = 1;
 					break;
 				}
@@ -246,6 +307,8 @@ int main()
 				default:
 					break;
 				}
+
+				
 
 				contenemigos = contenemigos + 1;
 
@@ -420,11 +483,8 @@ struct muro cargarpared()
 		{
 			if (mat[i][j] == 'x')
 			{
-				//printf("mat[i][j] = %c\n", mat[i][j]);
-				//printf("i = %d\t j = %d\n", i, j);
 				pared.posicionX[i][j] = i * 16;
 				pared.posicionY[i][j] = j * 12;
-				//printf("posicionX = %d\tposicionY = %d\n", pared[i][j].posicionX, pared[i][j].posicionY);
 			}
 
 		}
