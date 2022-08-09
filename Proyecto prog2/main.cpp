@@ -178,7 +178,7 @@ int main()
 
 			for (i = 0; i < MAX; i++)
 			{
-				al_draw_bitmap(zombi, enemigo[i].posicionX, enemigo[i].posicionY, 0);//enemigo
+				al_draw_bitmap(zombi, enemigo[i].posicionX * 16, enemigo[i].posicionY * 12, 0);//enemigo
 			}
 
 			for (i = 0; i < MAXELEM; i++)
@@ -187,12 +187,12 @@ int main()
 			}
 
 
-			al_draw_bitmap(player, jugador.posicionX, jugador.posicionY, 0); /*personaje*/
-			if (jugador.posicionX > ancho-1)
+			al_draw_bitmap(player, jugador.posicionX*16, jugador.posicionY*12, 0); /*personaje*/
+			if (jugador.posicionX*16 > ancho-1)
 			{
 				jugador.posicionX = 0;
 			}
-			if (jugador.posicionX < -1)
+			if (jugador.posicionX*16 < -1)
 			{
 				jugador.posicionX = ancho-16;
 			}
@@ -201,7 +201,7 @@ int main()
 
 			for (i = 0; i < MAXELEM; i++)//suma de puntaje
 			{
-				if (jugador.posicionX == elemento[i].posicionX && jugador.posicionY == elemento[i].posicionY)
+				if (jugador.posicionX*16 == elemento[i].posicionX && jugador.posicionY *12== elemento[i].posicionY)
 				{
 					puntos = puntaje(puntos);
 					elemento[i].posicionX = -30;//intentar cambiarlo 
@@ -210,7 +210,7 @@ int main()
 			}
 			for (i = 0; i < MAXELEM; i++)
 			{
-				if (jugador.posicionX == enemigo[i].posicionX && jugador.posicionY == enemigo[i].posicionY)
+				if (jugador.posicionX*16 == enemigo[i].posicionX * 16 && jugador.posicionY*12 == enemigo[i].posicionY * 12)
 				{
 					corazones = vidas(corazones);
 					jugador.posicionX = x;
@@ -237,57 +237,40 @@ int main()
 				{
 				case ALLEGRO_KEY_D:
 				{
-					for (i = 0; i < M; i++)//"colision"
+					if (mat[jugador.posicionX +1][jugador.posicionY] != 'x')//colision con paredes
 					{
-						for (j = 0; j < N; j++)
-						{
-							if (jugador.posicionX + 16 == pared.posicionX[i][j] && jugador.posicionY == pared.posicionY[i][j])
-							{
-								jugador.posicionX = jugador.posicionX - 16;
-								break;
-							}
-						}
+						jugador.posicionX = jugador.posicionX + 1;
+						break;
 					}
-					jugador.posicionX = jugador.posicionX + 16;
 					break;
 				}
 				case ALLEGRO_KEY_A:
 				{
-					for (i = 0; i < M; i++)//"colision"
+					if (mat[jugador.posicionX -1][jugador.posicionY] != 'x')//colision con paredes
 					{
-						for (j = 0; j < N; j++)
-						{
-							if (jugador.posicionX - 16 == pared.posicionX[i][j] && jugador.posicionY == pared.posicionY[i][j])
-							{
-								printf("hola\n");
-								jugador.posicionX = jugador.posicionX + 16;
-								break;
-							}
-						}
+						jugador.posicionX = jugador.posicionX - 1;
+						break;
 					}
-					jugador.posicionX = jugador.posicionX - 16;
 					break;
 				}
 				case ALLEGRO_KEY_W:
 				{
-					for (i = 0; i < M; i++)//"colision"
+					if (mat[jugador.posicionX][jugador.posicionY - 1] != 'x')//colision con paredes
 					{
-						for (j = 0; j < N; j++)
-						{
-							if (jugador.posicionX  == pared.posicionX[i][j] && jugador.posicionY - 12 == pared.posicionY[i][j])
-							{
-								printf("hola\n");
-								jugador.posicionX = jugador.posicionX + 12;
-								break;
-							}
-						}
+						jugador.posicionY = jugador.posicionY - 1;
+						break;
 					}
-					jugador.posicionY = jugador.posicionY - 12;
 					break;
 				}
 				case ALLEGRO_KEY_S:
 				{
-					jugador.posicionY = jugador.posicionY + 12;
+					if (mat[jugador.posicionX][jugador.posicionY + 1] != 'x')//colision con paredes
+					{
+						jugador.posicionY = jugador.posicionY + 1;
+						break;
+					}
+
+					
 					break;
 				}
 				case ALLEGRO_KEY_ESCAPE:
@@ -314,28 +297,61 @@ int main()
 
 				for (i = 0; i < MAX; i++)
 				{
-					if (contenemigos % 10 == 0)
+					//if (contenemigos % 10 == 0)
 					{
-						j = 1 + rand() % 4;
-						if (j == 1)
+						switch (j = 1 + rand() % 4)
 						{
-							enemigo[i].posicionX = enemigo[i].posicionX + 16;
-							enemigo[i].posicionY = enemigo[i].posicionY + 12;
+						case 1:
+						{
+							if (mat[enemigo[i].posicionX + 1][enemigo[i].posicionY + 1] != 'x')//colision con paredes
+							{
+								enemigo[i].posicionX = enemigo[i].posicionX + 1;
+								enemigo[i].posicionY = enemigo[i].posicionY + 1;
+								break;
+							}
+							printf("hola");
+							break;
 						}
-						if (j == 2)
+
+						case 2:
 						{
-							enemigo[i].posicionX = enemigo[i].posicionX - 16;
-							enemigo[i].posicionY = enemigo[i].posicionY - 12;
+							if (mat[enemigo[i].posicionX - 1][enemigo[i].posicionY - 1] != 'x')//colision con paredes
+							{
+								enemigo[i].posicionX = enemigo[i].posicionX - 1;
+								enemigo[i].posicionY = enemigo[i].posicionY - 1;
+								break;
+							}
+							printf("hola");
+							break;
 						}
-						if (j == 3)
+
+						case 3:
 						{
-							enemigo[i].posicionX = enemigo[i].posicionX + 16;
-							enemigo[i].posicionY = enemigo[i].posicionY - 12;
+							if (mat[enemigo[i].posicionX + 1][enemigo[i].posicionY - 1] != 'x')//colision con paredes
+							{
+								enemigo[i].posicionX = enemigo[i].posicionX + 1;
+								enemigo[i].posicionY = enemigo[i].posicionY - 1;
+								
+								break;
+							}
+							printf("hola");
+							break;
 						}
-						if (j == 4)
+
+						case 4:
 						{
-							enemigo[i].posicionX = enemigo[i].posicionX - 16;
-							enemigo[i].posicionY = enemigo[i].posicionY + 12;
+							if (mat[enemigo[i].posicionX - 1][enemigo[i].posicionY + 1] != 'x')//colision con paredes
+							{
+								enemigo[i].posicionX = enemigo[i].posicionX - 1;
+								enemigo[i].posicionY = enemigo[i].posicionY + 1;
+								break;
+							}
+							printf("hola");
+							break;
+						}
+
+						default:
+							break;
 						}
 					}
 				}
@@ -379,8 +395,8 @@ movimiento cargarmapa()
 			//printf("%c", mat[i][j]);
 			if (mat[i][j] == 'p')
 			{
-				jugador.posicionX = i * 16;
-				jugador.posicionY = j * 12;
+				jugador.posicionX = i ;
+				jugador.posicionY = j ;
 				return jugador;
 			}
 		}
@@ -393,19 +409,6 @@ zombies cargarenemigo(int index)
 	zombies enemigo[MAX];
 	int i = 0, j = 0,cont = 0;
 
-	FILE* mapa;
-
-	mapa = fopen("datos/mapas/mapa1.txt", "r");
-
-	for (i = 0; i < M; i++)
-	{
-		for (j = 0; j < N; j++)
-		{
-			fscanf(mapa, "%c", &mat[i][j]);
-		}
-		//fscanf(mapa, "\n");
-	}
-	fclose(mapa);
 	for (i = 0; i < M; i++)
 	{
 		for (j = 0; j < N; j++)
@@ -414,8 +417,8 @@ zombies cargarenemigo(int index)
 			//printf("%c", mat[i][j]);
 			if (mat[i][j] == 'e' && cont <= MAX)
 			{
-				enemigo[cont].posicionX = i * 16;
-				enemigo[cont].posicionY = j * 12;
+				enemigo[cont].posicionX = i ;
+				enemigo[cont].posicionY = j ;
 				cont++;
 			}
 			
@@ -428,20 +431,6 @@ movimiento cargarelementos(int index)
 {
 	movimiento elemento[MAXELEM];
 	int i = 0, j = 0,cont=0;
-
-	FILE* mapa;
-
-	mapa = fopen("datos/mapas/mapa1.txt", "r");
-
-	for (i = 0; i < M; i++)
-	{
-		for (j = 0; j < N; j++)
-		{
-			fscanf(mapa, "%c", &mat[i][j]);
-		}
-	}
-
-	fclose(mapa);
 
 	for (i = 0; i < M; i++)
 	{
@@ -463,20 +452,6 @@ struct muro cargarpared()
 	struct muro pared ;
 	int i = 0, j = 0;
 
-	FILE* mapa;
-
-	mapa = fopen("datos/mapas/mapa1.txt", "r");
-
-	for (i = 0; i < M; i++)
-	{
-		for (j = 0; j < N; j++)
-		{
-			fscanf(mapa, "%c", &mat[i][j]);
-		}
-		//fscanf(mapa, "\n");
-	}
-	fclose(mapa);
-	//printf("paredes funcion\n");
 	for (i = 0; i < M; i++)
 	{
 		for (j = 0; j < N; j++)
