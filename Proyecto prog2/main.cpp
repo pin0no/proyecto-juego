@@ -63,7 +63,7 @@ int main()
 	struct muro pared;
 
 	int i = 0, j = 0, cont = 0, puntos = 0, contenemigos = 0, movimientojugador = 0;
-	int x = 0, y = 0, bandera = 0, gmrv;
+	int x = 0, y = 0, bandera = 0, gmrv, derecha = 0, izquierda = 0, arriba = 0, abajo = 0;
 	int corazones = 3;
 
 	al_init();			/*iniciaciones*/
@@ -137,7 +137,7 @@ int main()
 	
 	while (true)
 	{
-		if (bandera == 0)
+		if (bandera == 0)//menu ||agregar menu con mouse||
 		{
 			al_clear_to_color(al_map_rgb(0, 0, 0));
 			al_draw_text(letras1, blanco, ancho / 2 - 16 * 6, alto / 2 + 12 * 6, NULL, "presione k para iniciar el juego  presione l para salir del juego");
@@ -163,7 +163,7 @@ int main()
 				}
 			}
 		}
-		if (bandera == 1)
+		if (bandera == 1)//juego
 		{
 			al_clear_to_color(al_map_rgb(0, 0, 0));
 
@@ -181,7 +181,7 @@ int main()
 				al_draw_bitmap(zombi, enemigo[i].posicionX * 16, enemigo[i].posicionY * 12, 0);//enemigo
 			}
 
-			for (i = 0; i < MAXELEM; i++)
+			for (i = 0; i < MAXELEM; i++)//objetos
 			{
 				al_draw_bitmap(objeto, elemento[i].posicionX, elemento[i].posicionY, 0);
 			}
@@ -208,14 +208,14 @@ int main()
 
 			for (i = 0; i < MAXELEM; i++)
 			{
-				if (jugador.posicionX*16 == enemigo[i].posicionX * 16 && jugador.posicionY*12 == enemigo[i].posicionY * 12)
+				if (jugador.posicionX*16 == enemigo[i].posicionX * 16 && jugador.posicionY*12 == enemigo[i].posicionY * 12)//cuando el jugador choca con un enemigo
 				{
 					corazones = vidas(corazones);
 					jugador.posicionX = x;
 					jugador.posicionY = y;
 					if (corazones == 0)
 					{
-						al_destroy_bitmap(bloque);
+						al_destroy_bitmap(bloque);//liberacion de memoria
 						al_destroy_bitmap(player);
 						al_destroy_bitmap(fondo);
 						al_destroy_bitmap(zombi);
@@ -232,50 +232,69 @@ int main()
 				{
 					if (contenemigos % 10 == 0)
 					{
-						switch (j = 1 + rand() % 4)
+						if (derecha != enemigo[i].posicionX)//necesito ayuda en esto que es lograr que los enemigos escogan una direccion dependiendo cual numero obtengan y de ahi moverse en esa direccion hasta tener una colision
 						{
-						case 1:
-						{
-							if (mat[enemigo[i].posicionX + 1][enemigo[i].posicionY] != 'x')//colision con paredes
+							
+							switch (j = 1 + rand() % 4)
 							{
-								enemigo[i].posicionX = enemigo[i].posicionX + 1;
+							case 1:
+							{
+								if (mat[enemigo[i].posicionX + 1][enemigo[i].posicionY] != 'x')//colision con paredes
+								{
+									//printf("enemigo[i] = %d\n\n", enemigo[i].posicionX);
+									enemigo[i].posicionX = enemigo[i].posicionX + 1;
+									derecha = enemigo[i].posicionX;
+									//printf("enemigo[i] = %d\ni = %d\nderecha = %d\n", enemigo[i].posicionX, i, derecha);
+									break;
+								}
 								break;
 							}
-							break;
-						}
 
-						case 2:
-						{
-							if (mat[enemigo[i].posicionX - 1][enemigo[i].posicionY] != 'x')//colision con paredes
+							case 2:
 							{
-								enemigo[i].posicionX = enemigo[i].posicionX - 1;
+								if (mat[enemigo[i].posicionX - 1][enemigo[i].posicionY] != 'x')//colision con paredes
+								{
+									enemigo[i].posicionX = enemigo[i].posicionX - 1;
+									break;
+								}
 								break;
 							}
-							break;
-						}
 
-						case 3:
-						{
-							if (mat[enemigo[i].posicionX][enemigo[i].posicionY - 1] != 'x')//colision con paredes
+							case 3:
 							{
-								enemigo[i].posicionY = enemigo[i].posicionY - 1;
+								if (mat[enemigo[i].posicionX][enemigo[i].posicionY - 1] != 'x')//colision con paredes
+								{
+									enemigo[i].posicionY = enemigo[i].posicionY - 1;
+									break;
+								}
 								break;
 							}
-							break;
-						}
 
-						case 4:
-						{
-							if (mat[enemigo[i].posicionX][enemigo[i].posicionY + 1] != 'x')//colision con paredes
+							case 4:
 							{
-								enemigo[i].posicionY = enemigo[i].posicionY + 1;
+								if (mat[enemigo[i].posicionX][enemigo[i].posicionY + 1] != 'x')//colision con paredes
+								{
+									enemigo[i].posicionY = enemigo[i].posicionY + 1;
+									break;
+								}
 								break;
 							}
-							break;
-						}
 
-						default:
-							break;
+							default:
+								break;
+							}
+						}
+						
+						if (derecha == enemigo[i].posicionX)
+						{
+							//printf("enemigo[i] = %d\ni = %d\nderecha = %d\n", enemigo[i].posicionX, i, derecha);
+							enemigo[i].posicionX = enemigo[i].posicionX + 1;
+							derecha = enemigo[i].posicionX;
+
+							if (mat[enemigo[i].posicionX + 1][enemigo[i].posicionY] != 'x')
+							{
+								derecha = 0;
+							}
 						}
 					}
 				}
@@ -364,7 +383,7 @@ int main()
 				}
 			}
 		}
-		if (bandera == 2)
+		if (bandera == 2)//game over
 		{
 			gmrv=gameover(puntos);
 			if (gmrv == 1)
