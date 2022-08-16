@@ -62,13 +62,15 @@ int main()
 	zombies enemigo[MAX];
 	struct muro pared;
 
-	int i = 0, j = 0, cont = 0, puntos = 0, contenemigos = 0, movimientojugador = 0;
+	int i = 0, j = 0, cont = 0, puntos = 0, contenemigos = 0, movimientojugador = 0, mouseX = -1, mouseY = -1;
 	int x = 0, y = 0, bandera = 0, gmrv, derecha = 0, izquierda = 0, arriba = 0, abajo = 0;
 	int corazones = 3;
 
 	al_init();			/*iniciaciones*/
 
 	al_install_keyboard();//teclado
+
+	al_install_mouse();//mouse
 
 	al_init_image_addon();//imagenes
 
@@ -106,6 +108,9 @@ int main()
 
 	ALLEGRO_KEYBOARD_STATE* state{};
 
+	ALLEGRO_EVENT evento;
+
+	al_register_event_source(event_queue, al_get_mouse_event_source());
 
 	al_reserve_samples(10);
 
@@ -131,8 +136,6 @@ int main()
 
 	pared = cargarpared();
 
-	ALLEGRO_EVENT evento;
-
 	//al_play_sample_instance(songinstance);
 	
 	while (true)
@@ -144,6 +147,13 @@ int main()
 			al_flip_display();
 
 			al_wait_for_event(event_queue, &evento);
+
+			if (evento.type == ALLEGRO_EVENT_MOUSE_AXES)
+			{
+				mouseX = evento.mouse.x;
+				mouseY = evento.mouse.y;
+				printf("x = %d\ty = %d\n", mouseX, mouseY);
+			}
 
 			if (evento.type == ALLEGRO_EVENT_KEY_DOWN)
 			{
@@ -162,9 +172,11 @@ int main()
 					break;
 				}
 			}
+			
 		}
 		if (bandera == 1)//juego
 		{
+			al_play_sample_instance(songinstance);
 			al_clear_to_color(al_map_rgb(0, 0, 0));
 
 			al_draw_bitmap(fondo, 0, 0, 0);
