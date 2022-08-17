@@ -144,7 +144,12 @@ int main()
 		{
 			al_clear_to_color(al_map_rgb(0, 0, 0));
 			al_draw_text(letras1, blanco, ancho / 2 - 16 * 6, alto / 2 + 12 * 6, NULL, "presione k para iniciar el juego  presione l para salir del juego");
-			al_flip_display();
+
+			al_draw_rectangle(ancho - 16, 12 * 4, ancho - 16 * 7, 12 * 2, blanco, 30);
+
+			
+
+			
 
 			al_wait_for_event(event_queue, &evento);
 
@@ -154,7 +159,30 @@ int main()
 				mouseY = evento.mouse.y;
 				printf("x = %d\ty = %d\n", mouseX, mouseY);
 			}
+			if (mouseX > ancho - 16 * 8 && mouseX < ancho  && mouseY < 12 * 4 && 12 * 2)//si pasa el mouse hace un cambio 
+			{
+				al_clear_to_color(al_map_rgb(0, 0, 0));
 
+				al_draw_text(letras1, blanco, ancho / 2 - 16 * 6, alto / 2 + 12 * 6, NULL, "presione k para iniciar el juego  presione l para salir del juego");
+
+				al_draw_rectangle(ancho - 16, 12 * 4, ancho - 16 * 7, 12 * 2, rojo, 30);
+			}
+			al_flip_display();
+			if (evento.type == ALLEGRO_EVENT_MOUSE_BUTTON_DOWN)
+			{
+				switch(evento.mouse.button)
+				{
+				case 1:
+				{
+					if (mouseX > ancho - 16 * 8 && mouseX < ancho && mouseY < 12 * 4 && 12 * 2)
+					{
+						bandera = 1;
+						break;
+					}
+				}	
+					break;
+				}
+			}
 			if (evento.type == ALLEGRO_EVENT_KEY_DOWN)
 			{
 				switch (evento.keyboard.keycode)
