@@ -49,7 +49,7 @@ int mat[M][N];
 /*int posicionX = 0 , posicionY = 0;*/
 
 
-ALLEGRO_EVENT_QUEUE* event_queue;
+
 
 ALLEGRO_SAMPLE* musica = NULL;
 ALLEGRO_SAMPLE_INSTANCE* songinstance = NULL;
@@ -63,7 +63,7 @@ int main()
 	struct muro pared;
 
 	int i = 0, j = 0, cont = 0, puntos = 0, contenemigos = 0, movimientojugador = 0, mouseX = -1, mouseY = -1;
-	int x = 0, y = 0, bandera = 0, gmrv, derecha = 0, izquierda = 0, arriba = 0, abajo = 0;
+	int x = 0, y = 0, bandera = 0, gmrv, derecha = 0, izquierda = 0, arriba = 0, abajo = 0, png=0;
 	int corazones = 3;
 
 	al_init();			/*iniciaciones*/
@@ -89,11 +89,11 @@ int main()
 
 	al_set_window_title(ventana, "primer avance");/*cambio de titulo*/
 
-	event_queue = al_create_event_queue();
-	al_register_event_source(event_queue, al_get_keyboard_event_source());
+	
+	
 
 	ALLEGRO_BITMAP* bloque = al_load_bitmap("datos/imagenes/pared.png");/*imagenes a utilizar*/
-	ALLEGRO_BITMAP* player = al_load_bitmap("datos/imagenes/personaje.png");
+	ALLEGRO_BITMAP* player = al_load_bitmap("datos/imagenes/pacman.png");
 	ALLEGRO_BITMAP* fondo = al_load_bitmap("datos/imagenes/cesped.jpg");
 	ALLEGRO_BITMAP* zombi = al_load_bitmap("datos/imagenes/fantasma.png");
 	ALLEGRO_BITMAP* objeto = al_load_bitmap("datos/imagenes/corazon.jpg");
@@ -109,11 +109,14 @@ int main()
 	ALLEGRO_KEYBOARD_STATE* state{};
 
 	ALLEGRO_EVENT evento;
+	ALLEGRO_EVENT_QUEUE* event_queue;
 
+	event_queue = al_create_event_queue();
+	
+	al_register_event_source(event_queue, al_get_keyboard_event_source());
 	al_register_event_source(event_queue, al_get_mouse_event_source());
 
 	al_reserve_samples(10);
-
 	musica = al_load_sample("datos/musica/papaya song.ogg");
 
 	songinstance = al_create_sample_instance(musica);
@@ -142,14 +145,11 @@ int main()
 	{
 		if (bandera == 0)//menu ||agregar menu con mouse||
 		{
+			
 			al_clear_to_color(al_map_rgb(0, 0, 0));
 			al_draw_text(letras1, blanco, ancho / 2 - 16 * 6, alto / 2 + 12 * 6, NULL, "presione k para iniciar el juego  presione l para salir del juego");
 
 			al_draw_rectangle(ancho - 16, 12 * 4, ancho - 16 * 7, 12 * 2, blanco, 30);
-
-			
-
-			
 
 			al_wait_for_event(event_queue, &evento);
 
@@ -176,6 +176,7 @@ int main()
 				{
 					if (mouseX > ancho - 16 * 8 && mouseX < ancho && mouseY < 12 * 4 && 12 * 2)
 					{
+						al_uninstall_mouse();
 						bandera = 1;
 						break;
 					}
@@ -189,6 +190,7 @@ int main()
 				{
 				case ALLEGRO_KEY_K:
 				{
+				
 					bandera = 1;
 					break;
 				}
@@ -225,8 +227,34 @@ int main()
 			{
 				al_draw_bitmap(objeto, elemento[i].posicionX, elemento[i].posicionY, 0);
 			}
-
-			al_draw_bitmap(player, jugador.posicionX*16, jugador.posicionY*12, 0); /*personaje*/
+			
+		//	al_draw_bitmap(player, jugador.posicionX*16, jugador.posicionY*12, 0); /*personaje*/
+			printf("png = %d\n", png);
+			switch(png)
+			{
+			case 0:
+			{
+				al_draw_bitmap_region(player, 473, 1, 12, 12, jugador.posicionX * 16, jugador.posicionY * 12, 0);//derecha
+				break;
+			}
+			case 1:
+			{
+				al_draw_bitmap_region(player, 474, 17, 12, 12, jugador.posicionX * 16, jugador.posicionY * 12, 0);//izquierda
+				break;
+			}
+			case 2:
+			{
+				al_draw_bitmap_region(player, 473, 34, 12, 12, jugador.posicionX * 16, jugador.posicionY * 12, 0);//arriba
+				break;
+			}
+			case 3:
+			{
+				al_draw_bitmap_region(player, 473, 49, 12, 12, jugador.posicionX * 16, jugador.posicionY * 12, 0);//abajo
+				break;
+			}
+			break;
+			}
+		
 			if (jugador.posicionX*16 > ancho-1)
 			{
 				jugador.posicionX = 0;
@@ -358,6 +386,7 @@ int main()
 				{
 					if (mat[jugador.posicionX +1][jugador.posicionY] != 'x')//colision con paredes
 					{
+						png = 0;
 						jugador.posicionX = jugador.posicionX + 1;
 						movimientojugador = 1;
 						break;
@@ -369,6 +398,7 @@ int main()
 				{
 					if (mat[jugador.posicionX -1][jugador.posicionY] != 'x')//colision con paredes
 					{
+						png = 1;
 						jugador.posicionX = jugador.posicionX - 1;
 						movimientojugador = 1;
 						break;
@@ -380,6 +410,7 @@ int main()
 				{
 					if (mat[jugador.posicionX][jugador.posicionY - 1] != 'x')//colision con paredes
 					{
+						png = 2;
 						jugador.posicionY = jugador.posicionY - 1;
 						movimientojugador = 1;
 						break;
@@ -391,6 +422,7 @@ int main()
 				{
 					if (mat[jugador.posicionX][jugador.posicionY + 1] != 'x')//colision con paredes
 					{
+						png = 3;
 						jugador.posicionY = jugador.posicionY + 1;
 						movimientojugador = 1;
 						break;
@@ -552,6 +584,7 @@ int gameover(int puntos)
 	ALLEGRO_COLOR rojo = al_map_rgb(255, 0, 0);
 	ALLEGRO_KEYBOARD_STATE* state{};
 	ALLEGRO_EVENT evento;
+	ALLEGRO_EVENT_QUEUE* event_queue;
 
 	event_queue = al_create_event_queue();
 	al_register_event_source(event_queue, al_get_keyboard_event_source());
