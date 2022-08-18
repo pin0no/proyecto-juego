@@ -19,6 +19,7 @@
 int puntaje(int puntos);//funcion para el puntaje
 int vidas(int corazones);
 int gameover(int puntos);
+int rnk(int puntos);
 
 struct posicion
 {
@@ -35,7 +36,13 @@ struct enemy
 	int posicionX=0;
 	int posicionY=0;
 };
+struct user 
+{
+	char nombre[30];
+	int puntaje;
+};
 
+typedef struct user usuario;
 typedef struct posicion movimiento;
 typedef struct enemy zombies ;
 movimiento cargarmapa();
@@ -45,7 +52,7 @@ struct muro cargarpared();
 
 using namespace std;
 
-int mat[M][N];
+char mat[M][N];
 /*int posicionX = 0 , posicionY = 0;*/
 
 
@@ -157,7 +164,7 @@ int main()
 			{
 				mouseX = evento.mouse.x;
 				mouseY = evento.mouse.y;
-				printf("x = %d\ty = %d\n", mouseX, mouseY);
+				//printf("x = %d\ty = %d\n", mouseX, mouseY);
 			}
 			if (mouseX > ancho - 16 * 8 && mouseX < ancho  && mouseY < 12 * 4 && 12 * 2)//si pasa el mouse hace un cambio 
 			{
@@ -206,7 +213,7 @@ int main()
 		}
 		if (bandera == 1)//juego
 		{
-			al_play_sample_instance(songinstance);
+			//al_play_sample_instance(songinstance);
 			al_clear_to_color(al_map_rgb(0, 0, 0));
 
 			al_draw_bitmap(fondo, 0, 0, 0);
@@ -229,7 +236,7 @@ int main()
 			}
 			
 		//	al_draw_bitmap(player, jugador.posicionX*16, jugador.posicionY*12, 0); /*personaje*/
-			printf("png = %d\n", png);
+			//printf("png = %d\n", png);
 			switch(png)
 			{
 			case 0:
@@ -283,6 +290,7 @@ int main()
 					jugador.posicionY = y;
 					if (corazones == 0)
 					{
+						rnk(puntos);
 						al_destroy_bitmap(bloque);//liberacion de memoria
 						al_destroy_bitmap(player);
 						al_destroy_bitmap(fondo);
@@ -613,5 +621,22 @@ int gameover(int puntos)
 			break;
 		}
 	}
+	return 0;
+}
+
+int rnk(int puntos)
+{
+	usuario jugador;
+
+	FILE* ranking;
+	ranking = fopen("datos/ranking/puntaje.dat", "a+b");//escritura o creacion del ranking en caso de que no exista
+
+	printf("ingrese su nombre de usuario:");//ingreso de nombre de usuario 
+	jugador.puntaje = puntos;
+	scanf("%s", jugador.nombre);
+	scanf("%d", &jugador.puntaje);
+
+	fwrite(&jugador, sizeof(usuario), 1, ranking);
+	//fclose(ranking);
 	return 0;
 }
