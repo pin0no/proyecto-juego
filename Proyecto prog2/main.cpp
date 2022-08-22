@@ -18,6 +18,7 @@
 #define MAXELEM 5
 int puntaje(int puntos);//funcion para el puntaje
 int vidas(int corazones);
+int menuflg(ALLEGRO_BITMAP*inicio[5], ALLEGRO_EVENT evento, ALLEGRO_EVENT_QUEUE* event_queue, int bandera);
 int gameover(int puntos);
 int rnk(int puntos);
 
@@ -69,7 +70,7 @@ int main()
 	zombies enemigo[MAX];
 	struct muro pared;
 
-	int i = 0, j = 0, cont = 0, puntos = 0, contenemigos = 0, movimientojugador = 0, mouseX = -1, mouseY = -1;
+	int i = 0, j = 0, cont = 0, puntos = 0, contenemigos = 0, movimientojugador = 0;
 	int x = 0, y = 0, bandera = 0, gmrv, derecha = 0, izquierda = 0, arriba = 0, abajo = 0, png=0;
 	int corazones = 3;
 
@@ -104,6 +105,14 @@ int main()
 	ALLEGRO_BITMAP* fondo = al_load_bitmap("datos/imagenes/cesped.jpg");
 	ALLEGRO_BITMAP* zombi = al_load_bitmap("datos/imagenes/fantasma.png");
 	ALLEGRO_BITMAP* objeto = al_load_bitmap("datos/imagenes/corazon.jpg");
+	//menu
+	ALLEGRO_BITMAP* menu = al_load_bitmap("datos/imagenes/menu.png");
+	ALLEGRO_BITMAP* jugar = al_load_bitmap("datos/imagenes/jugar.png");
+	ALLEGRO_BITMAP* opciones = al_load_bitmap("datos/imagenes/opciones.png");
+	ALLEGRO_BITMAP* ranking = al_load_bitmap("datos/imagenes/ranking.png");
+	ALLEGRO_BITMAP* salir = al_load_bitmap("datos/imagenes/salir.png");
+	ALLEGRO_BITMAP* inicio[5] = { al_load_bitmap("datos/imagenes/menu.png"),al_load_bitmap("datos/imagenes/jugar.png"),al_load_bitmap("datos/imagenes/opciones.png"),al_load_bitmap("datos/imagenes/ranking.png"),al_load_bitmap("datos/imagenes/salir.png") };
+	//ALLEGRO_BITMAP* menu1 = al_load_bitmap("datos/imagenes/menu1.png");
 
 	ALLEGRO_FONT* letras = al_load_font("datos/fuentes/AldotheApache.ttf", 50, 0);
 	ALLEGRO_FONT* letras1 = al_load_font("datos/fuentes/AldotheApache.ttf", 20, 0);
@@ -115,7 +124,7 @@ int main()
 
 	ALLEGRO_KEYBOARD_STATE* state{};
 
-	ALLEGRO_EVENT evento;
+	ALLEGRO_EVENT evento{};
 	ALLEGRO_EVENT_QUEUE* event_queue;
 
 	event_queue = al_create_event_queue();
@@ -150,71 +159,16 @@ int main()
 	
 	while (true)
 	{
+		al_clear_to_color(al_map_rgb(0, 0, 0));
 		if (bandera == 0)//menu ||agregar menu con mouse||
 		{
-			
-			al_clear_to_color(al_map_rgb(0, 0, 0));
-			al_draw_text(letras1, blanco, ancho / 2 - 16 * 6, alto / 2 + 12 * 6, NULL, "presione k para iniciar el juego  presione l para salir del juego");
-
-			al_draw_rectangle(ancho - 16, 12 * 4, ancho - 16 * 7, 12 * 2, blanco, 30);
-
-			al_wait_for_event(event_queue, &evento);
-
-			if (evento.type == ALLEGRO_EVENT_MOUSE_AXES)
-			{
-				mouseX = evento.mouse.x;
-				mouseY = evento.mouse.y;
-				//printf("x = %d\ty = %d\n", mouseX, mouseY);
-			}
-			if (mouseX > ancho - 16 * 8 && mouseX < ancho  && mouseY < 12 * 4 && 12 * 2)//si pasa el mouse hace un cambio 
-			{
-				al_clear_to_color(al_map_rgb(0, 0, 0));
-
-				al_draw_text(letras1, blanco, ancho / 2 - 16 * 6, alto / 2 + 12 * 6, NULL, "presione k para iniciar el juego  presione l para salir del juego");
-
-				al_draw_rectangle(ancho - 16, 12 * 4, ancho - 16 * 7, 12 * 2, rojo, 30);
-			}
-			al_flip_display();
-			if (evento.type == ALLEGRO_EVENT_MOUSE_BUTTON_DOWN)
-			{
-				switch(evento.mouse.button)
-				{
-				case 1:
-				{
-					if (mouseX > ancho - 16 * 8 && mouseX < ancho && mouseY < 12 * 4 && 12 * 2)
-					{
-						al_uninstall_mouse();
-						bandera = 1;
-						break;
-					}
-				}	
-					break;
-				}
-			}
-			if (evento.type == ALLEGRO_EVENT_KEY_DOWN)
-			{
-				switch (evento.keyboard.keycode)
-				{
-				case ALLEGRO_KEY_K:
-				{
-				
-					bandera = 1;
-					break;
-				}
-				case ALLEGRO_KEY_L:
-				{
-					return 0;
-				}
-				default:
-					break;
-				}
-			}
+			bandera = menuflg(inicio, evento, event_queue, bandera);
 			
 		}
 		if (bandera == 1)//juego
 		{
 			//al_play_sample_instance(songinstance);
-			al_clear_to_color(al_map_rgb(0, 0, 0));
+			
 
 			al_draw_bitmap(fondo, 0, 0, 0);
 			for (i = 0; i < M; i++)
@@ -235,9 +189,7 @@ int main()
 				al_draw_bitmap(objeto, elemento[i].posicionX, elemento[i].posicionY, 0);
 			}
 			
-		//	al_draw_bitmap(player, jugador.posicionX*16, jugador.posicionY*12, 0); /*personaje*/
-			//printf("png = %d\n", png);
-			switch(png)
+			switch(png)//dibujo del jugador
 			{
 			case 0:
 			{
@@ -380,8 +332,6 @@ int main()
 			al_draw_textf(letras, negro, ancho - 16 * 8, 12, NULL, "%d", puntos);
 			al_draw_textf(letras, rojo, ancho - 16 * 2, 12, NULL, "%d", corazones);
 
-			al_flip_display();/*mostrar las imagenes en pantalla*/
-			
 			al_wait_for_event(event_queue, &evento);
 
 			//al_play_sample(musica, 40, 0.0, 2.0, ALLEGRO_PLAYMODE_ONCE,NULL);
@@ -399,7 +349,6 @@ int main()
 						movimientojugador = 1;
 						break;
 					}
-					movimientojugador = 1;
 					break;
 				}
 				case ALLEGRO_KEY_A:
@@ -411,7 +360,6 @@ int main()
 						movimientojugador = 1;
 						break;
 					}
-					movimientojugador = 1;
 					break;
 				}
 				case ALLEGRO_KEY_W:
@@ -423,7 +371,6 @@ int main()
 						movimientojugador = 1;
 						break;
 					}
-					movimientojugador = 1;
 					break;
 				}
 				case ALLEGRO_KEY_S:
@@ -435,7 +382,6 @@ int main()
 						movimientojugador = 1;
 						break;
 					}
-					movimientojugador = 1;
 					break;
 				}
 				case ALLEGRO_KEY_ESCAPE:
@@ -471,6 +417,7 @@ int main()
 			if (gmrv == 2)
 				bandera = 0;
 		}
+		al_flip_display();
 	}
 		
 	return 0;
@@ -582,6 +529,74 @@ int vidas(int corazones)
 {
 	corazones = corazones - 1;
 	return  corazones;
+}
+
+int menuflg(ALLEGRO_BITMAP* inicio[5], ALLEGRO_EVENT evento, ALLEGRO_EVENT_QUEUE* event_queue, int bandera)
+{
+	int  mouseX = -1, mouseY = -1;
+	al_draw_bitmap(inicio[0], 0, 0, 0);
+	al_wait_for_event(event_queue, &evento);
+
+	if (evento.type == ALLEGRO_EVENT_KEY_DOWN)
+	{
+		switch (evento.keyboard.keycode)
+		{
+		case ALLEGRO_KEY_K:
+		{
+			bandera = 1;
+			break;
+		}
+		case ALLEGRO_KEY_ESCAPE:
+		{
+			return 0;
+		}
+		default:
+			break;
+		}
+	}
+
+	if (evento.type == ALLEGRO_EVENT_MOUSE_AXES)
+	{
+		mouseX = evento.mouse.x;
+		mouseY = evento.mouse.y;
+		printf("x = %d\ty = %d\n", mouseX, mouseY);
+	}
+
+	if (mouseX < 983 && mouseX > 679 && mouseY < 195 && mouseY > 133)//si pasa el mouse hace un cambio 
+	{
+		al_draw_bitmap(inicio[1], 0, 0, 0);
+	}
+	if (mouseX < 981 && mouseX > 678 && mouseY < 322 && mouseY > 261)
+	{
+		al_draw_bitmap(inicio[2], 0, 0, 0);
+	}
+	if (mouseX < 325 && mouseX > 22 && mouseY < 663 && mouseY > 602)
+	{
+		al_draw_bitmap(inicio[3], 0, 0, 0);
+	}
+	if (mouseX < 981 && mouseX > 678 && mouseY < 454 && mouseY > 392)
+	{
+		al_draw_bitmap(inicio[4], 0, 0, 0);
+	}
+
+	if (evento.type == ALLEGRO_EVENT_MOUSE_BUTTON_DOWN)
+	{
+		switch (evento.mouse.button)
+		{
+		case 1:
+		{
+			if (mouseX < 983 && mouseX > 679 && mouseY < 195 && mouseY > 133)
+			{
+				//al_hide_mouse_cursor(ventana);
+				bandera = 1;
+			}
+		}
+		default:
+			break;
+		}
+	}
+	printf("evento = %d\n", evento.mouse.button);
+	return bandera;
 }
 
 int gameover(int puntos)
