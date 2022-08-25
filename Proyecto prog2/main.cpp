@@ -15,14 +15,14 @@
 #define M 64
 #define N 64
 #define MAX 5
-#define MAXELEM 5
+#define MAXELEM 10
 #define NOMBRE 10
 
 int puntaje(int puntos);//funcion para el puntaje
 int vidas(int corazones);
 int menuflg(ALLEGRO_BITMAP*inicio[5], ALLEGRO_EVENT evento, ALLEGRO_EVENT_QUEUE* event_queue, int bandera);
 int gameover(ALLEGRO_COLOR[3], ALLEGRO_FONT* font[2], ALLEGRO_EVENT evento, ALLEGRO_EVENT_QUEUE* event_queue, int puntos);
-int rnk(int puntos);
+int rnk(ALLEGRO_COLOR colors[3], ALLEGRO_FONT* font[2], ALLEGRO_EVENT evento, ALLEGRO_EVENT_QUEUE* event_queue, int puntos, int bandera);
 
 struct posicion
 {
@@ -167,6 +167,7 @@ int main()
 	{
 		al_clear_to_color(al_map_rgb(0, 0, 0));
 		al_wait_for_event(event_queue, &evento);
+
 		if (bandera == -1)
 		{
 			return 0;
@@ -228,13 +229,15 @@ int main()
 			break;
 			}
 
-			if (jugador.posicionX * 16 > ancho - 1)
+			if (jugador.posicionX * 16 > ancho-1 )
 			{
 				jugador.posicionX = 0;
+				printf("posicionX2=%d\n", jugador.posicionX);
 			}
 			if (jugador.posicionX * 16 < -1)
 			{
 				jugador.posicionX = ancho - 16;
+				printf("posicionX=%d\n", jugador.posicionX);
 			}
 
 			for (i = 0; i < MAXELEM; i++)//suma de puntaje
@@ -247,7 +250,7 @@ int main()
 				}
 			}
 
-			for (i = 0; i < MAXELEM; i++)
+			for (i = 0; i < MAX; i++)
 			{
 				if (jugador.posicionX * 16 == enemigo[i].posicionX * 16 && jugador.posicionY * 12 == enemigo[i].posicionY * 12)//cuando el jugador choca con un enemigo
 				{
@@ -256,7 +259,6 @@ int main()
 					jugador.posicionY = y;
 					if (corazones == 0)
 					{
-						//rnk(puntos);
 						//	al_destroy_bitmap(bloque);//liberacion de memoria
 						//	al_destroy_bitmap(player);
 						//	al_destroy_bitmap(fondo);
@@ -268,70 +270,56 @@ int main()
 				}
 			}
 			
-
+			//count algo ++
+			//if count_algo == 20 --> enemigo se mueve y count_algo = 0
 			contenemigos = contenemigos + 1;
-			for (i = 0; i < MAX; i++)
+			//printf("contenemigos = %d\n", contenemigos);
+			if (contenemigos == 20)
 			{
-				if (contenemigos % 10 == 0)
+				for (i = 0; i < MAX; i++)
 				{
-					if (derecha != enemigo[i].posicionX)//necesito ayuda en esto que es lograr que los enemigos escogan una direccion dependiendo cual numero obtengan y de ahi moverse en esa direccion hasta tener una colision
+					switch (j = 1 + rand() % 4)
 					{
-
-						switch (j = 1 + rand() % 4)
-						{
-						case 1:
-						{
-							if (mat[enemigo[i].posicionX + 1][enemigo[i].posicionY] != 'x')//colision con paredes
-							{
-								//printf("enemigo[i] = %d\n\n", enemigo[i].posicionX);
-								enemigo[i].posicionX = enemigo[i].posicionX + 1;
-								derecha = enemigo[i].posicionX;
-								//printf("enemigo[i] = %d\ni = %d\nderecha = %d\n", enemigo[i].posicionX, i, derecha);
-							}
-							break;
-						}
-						case 2:
-						{
-							if (mat[enemigo[i].posicionX - 1][enemigo[i].posicionY] != 'x')//colision con paredes
-							{
-								enemigo[i].posicionX = enemigo[i].posicionX - 1;
-							}
-							break;
-						}
-						case 3:
-						{
-							if (mat[enemigo[i].posicionX][enemigo[i].posicionY - 1] != 'x')//colision con paredes
-							{
-								enemigo[i].posicionY = enemigo[i].posicionY - 1;
-							}
-							break;
-						}
-
-						case 4:
-						{
-							if (mat[enemigo[i].posicionX][enemigo[i].posicionY + 1] != 'x')//colision con paredes
-							{
-								enemigo[i].posicionY = enemigo[i].posicionY + 1;
-							}
-							break;
-						}
-						default:
-							break;
-						}
-					}
-
-					if (derecha == enemigo[i].posicionX)
+					case 1:
 					{
-						//printf("enemigo[i] = %d\ni = %d\nderecha = %d\n", enemigo[i].posicionX, i, derecha);
-						enemigo[i].posicionX = enemigo[i].posicionX + 1;
-						derecha = enemigo[i].posicionX;
-						if (mat[enemigo[i].posicionX + 1][enemigo[i].posicionY] != 'x')
+						if (mat[enemigo[i].posicionX + 1][enemigo[i].posicionY] != 'x')//colision con paredes
 						{
-							derecha = 0;
+							enemigo[i].posicionX = enemigo[i].posicionX + 1;
 						}
+						break;
 					}
+					case 2:
+					{
+						if (mat[enemigo[i].posicionX - 1][enemigo[i].posicionY] != 'x')//colision con paredes
+						{
+							enemigo[i].posicionX = enemigo[i].posicionX - 1;
+						}
+						break;
+					}
+					case 3:
+					{
+						if (mat[enemigo[i].posicionX][enemigo[i].posicionY - 1] != 'x')//colision con paredes
+						{
+							enemigo[i].posicionY = enemigo[i].posicionY - 1;
+						}
+						break;
+					}
+					case 4:
+					{
+						if (mat[enemigo[i].posicionX][enemigo[i].posicionY + 1] != 'x')//colision con paredes
+						{
+							enemigo[i].posicionY = enemigo[i].posicionY + 1;
+						}
+						break;
+					}
+					default:
+						break;
+					}
+					contenemigos = 0;
+
 				}
 			}
+			
 
 			al_draw_rectangle(ancho - 16, 12 * 4, ancho - 16 * 7, 12 * 2, blanco, 30);
 			al_draw_textf(letras, negro, ancho - 16 * 8, 12, NULL, "%d", puntos);
@@ -407,9 +395,13 @@ int main()
 				}
 			}
 		}
-		if (bandera == 2)//game over
+		if (bandera == 2)//ranking
 		{
-			gmrv = gameover(colors,font,evento,event_queue,puntos);
+			bandera = rnk(colors,font,evento,event_queue,puntos,bandera);
+		}
+		if (bandera == 3)//game over
+		{
+			gmrv = gameover(colors, font, evento, event_queue, puntos);
 			if (gmrv == 1)
 				return 0;
 			if (gmrv == 2)
@@ -434,7 +426,7 @@ movimiento cargarmapa()
 	{
 		for (j = 0; j < N; j++)
 		{
-			fscanf(mapa, "%c", &mat[i][j]);
+			fscanf(mapa, "%c", &mat[j][i]);
 		}
 		//fscanf(mapa, "\n");
 	}
@@ -546,6 +538,10 @@ int menuflg(ALLEGRO_BITMAP* inicio[5], ALLEGRO_EVENT evento, ALLEGRO_EVENT_QUEUE
 		{
 			return -1;
 		}
+		case ALLEGRO_KEY_0:
+		{
+			return 2;
+		}
 		default:
 			break;
 		}
@@ -618,57 +614,81 @@ int gameover(ALLEGRO_COLOR colors[3], ALLEGRO_FONT* font[2], ALLEGRO_EVENT event
 	return 0;
 }
 
-int rnk(ALLEGRO_COLOR colors[3], ALLEGRO_FONT* font[2], ALLEGRO_EVENT evento, ALLEGRO_EVENT_QUEUE* event_queue, int puntos)
+int rnk(ALLEGRO_COLOR colors[3], ALLEGRO_FONT* font[2], ALLEGRO_EVENT evento, ALLEGRO_EVENT_QUEUE* event_queue, int puntos, int bandera)
 {
-	int i=0,espacio=ancho/2 -16*6;
+	int i = 0, espacio = ancho / 2 - 16 * 6;
+	char name[30]="pinono\n";
 	usuario jugador;
 
 	FILE* ranking;
+	ALLEGRO_FILE* rank;
 
-	ranking = fopen("datos/ranking/puntaje.dat", "w+");//escritura o creacion del ranking en caso de que no exista
+	rank = al_fopen("datos/ranking/puntajeallegro.txt", "w+");
+	ranking = fopen("datos/ranking/puntaje.txt", "w+");//escritura o creacion del ranking en caso de que no exista
 
-	al_draw_text(font[1], colors[1], ancho / 2 - 16 * 8, alto / 2 + 12 * 10, NULL, "ingrese nombre usuario: ");
-	for (i = 0; i < NOMBRE; i++)
+	jugador.puntaje = puntos;
+	printf("%d", jugador.puntaje);
+	al_draw_text(font[1], colors[1], 16*15, alto / 2 + 12 * 10, NULL, "ingrese nombre usuario: ");
+	if (evento.type == ALLEGRO_EVENT_KEY_DOWN)
 	{
-		if (evento.type == ALLEGRO_EVENT_KEY_DOWN)
+		switch (evento.keyboard.keycode)/*hacer una accion para cada tecla pulsada*/
 		{
-			switch (evento.keyboard.keycode)/*hacer una accion para cada tecla pulsada*/
-			{
-			case ALLEGRO_KEY_P:
-			{
-				al_draw_text(font[1], colors[1], espacio,alto/2+12*10,0,"p");
-				break;
-			}
-			case ALLEGRO_KEY_I:
-			{
+		case ALLEGRO_KEY_P:
+		{
+			al_draw_text(font[1], colors[1], espacio, alto / 2 + 12 * 10, 0, "p");
+			jugador.nombre[i] = 'p';
+			printf("jugador.nombre[%d]=%c\n", i, jugador.nombre[i]);
+			i++;
+			break;
+		}
+		case ALLEGRO_KEY_I:
+		{
+			al_draw_text(font[1], colors[1], espacio, alto / 2 + 12 * 10, 0, "i");
+			jugador.nombre[i] = 'i';
+			printf("jugador.nombre[%d]=%c\n", i, jugador.nombre[i]);
+			i++;
+			break;
+		}
+		case ALLEGRO_KEY_N:
+		{
+			al_draw_text(font[1], colors[1], espacio, alto / 2 + 12 * 10, 0, "n");
+			jugador.nombre[i] = 'n';
+			printf("jugador.nombre[%d]=%c\n", i, jugador.nombre[i]);
+			i++;
+			break;
+		}
+		case ALLEGRO_KEY_O:
+		{
+			al_draw_text(font[1], colors[1], espacio, alto / 2 + 12 * 10, 0, "o");
+			jugador.nombre[i] = 'o';
+			printf("jugador.nombre[%d]=%c\n", i, jugador.nombre[i]);
+			i++;
 
-				break;
-			}
-			case ALLEGRO_KEY_N:
-			{
-				
-				break;
-			}
-			case ALLEGRO_KEY_O:
-			{
-				
-				break;
-			}
-			case ALLEGRO_KEY_ESCAPE:
-			{
-				return 0;
-			}
-			case ALLEGRO_KEY_ENTER:
-			{
-				
-				break;
-			}
-			default:
-				break;
-			}
+			break;
+		}
+		case ALLEGRO_KEY_ESCAPE:
+		{
+			return -1;
+		}
+		case ALLEGRO_KEY_ENTER:
+		{
+			bandera = 3;
+			break;
+		}
+		default:
+			break;
 		}
 	}
-	
+	while (i < 30)
+	{
+		printf("i = %d\n", i);
+		strcpy(jugador.nombre, name);
+		fprintf(ranking, "%c-%d\n", jugador.nombre, puntos);//c++
+		al_fputs(rank, jugador.nombre);//allegro
+		al_fputc(rank, jugador.puntaje);
+		i = i + 1;
+	}
+	al_fclose(rank);
 	fclose(ranking);
-	return 0;
+	return bandera;
 }
