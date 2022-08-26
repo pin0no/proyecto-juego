@@ -10,7 +10,7 @@
 #include <allegro5/allegro_audio.h>
 #include <allegro5/allegro_acodec.h>
 
-#define ancho 1024
+#define ancho 1008
 #define alto 768
 #define M 64
 #define N 64
@@ -18,21 +18,29 @@
 #define MAXELEM 10
 #define NOMBRE 10
 
-int puntaje(int puntos);//funcion para el puntaje
+int puntaje(int puntos,int valor);//funcion para el puntaje
 int vidas(int corazones);
 int menuflg(ALLEGRO_BITMAP*inicio[5], ALLEGRO_EVENT evento, ALLEGRO_EVENT_QUEUE* event_queue, int bandera);
 int gameover(ALLEGRO_COLOR[3], ALLEGRO_FONT* font[2], ALLEGRO_EVENT evento, ALLEGRO_EVENT_QUEUE* event_queue, int puntos);
 int rnk(ALLEGRO_COLOR colors[3], ALLEGRO_FONT* font[2], ALLEGRO_EVENT evento, ALLEGRO_EVENT_QUEUE* event_queue, int puntos, int bandera);
 
-struct posicion
+struct player
 {
 	int posicionX=0;
 	int posicionY=0;
+	int vidas = 3;
+};
+struct elements
+{
+	int posicionX, posicionY;
+	int valor=300;
 };
 struct muro
 {
 	int posicionX[M][N];
 	int posicionY[M][N];
+	int posicionpuertaX[2];
+	int posicionpuertaY[2];
 };
 struct enemy 
 {
@@ -42,15 +50,22 @@ struct enemy
 struct user 
 {
 	char nombre[30];
-	int puntaje;
+	int puntaje=0;
 };
 
+typedef struct elements elementos;
 typedef struct user usuario;
-typedef struct posicion movimiento;
+typedef struct player jugador;
 typedef struct enemy zombies ;
 
-movimiento cargarmapa();
-movimiento cargarelementos(int index);
+//implementar cambio de mapas
+//simbolo dentro de mapa que sea una puerta hacia otro nivel 
+//solo aparece si puntaje > ciertos puntos 
+//crear bandera para crear/cambiar mapas
+//an
+void setmapa(const char*file_name);
+jugador setjugador();
+elementos cargarelementos(int index);
 zombies cargarenemigo(int index);
 struct muro cargarpared();
 
@@ -70,14 +85,18 @@ ALLEGRO_SAMPLE_INSTANCE* songinstance = NULL;
 int main()
 {
 	srand(time(0));
-	movimiento jugador, elemento[MAXELEM];/*movimiento jugador en posiciones X e Y*/
+	jugador jugador;/*movimiento jugador en posiciones X e Y*/
+	elementos elemento[MAXELEM];
 	zombies enemigo[MAX];
 	struct muro pared;
+	user usuario;
 
-	int i = 0, j = 0, cont = 0, puntos = 0, contenemigos = 0, movimientojugador = 0;
+	int i = 0, j = 0, cont = 1, contenemigos = 0, movimientojugador = 0;
 	int x = 0, y = 0, bandera = 0, gmrv, derecha = 0, izquierda = 0, arriba = 0, abajo = 0, png=0;
-	int corazones = 3;
+	int rotacion = 1,nivel=900,stge_nivel=0;
 
+	char buffer[10];
+	const char* sala = "datos / mapas / mapa";
 	al_init();			/*iniciaciones*/
 	
 	al_install_keyboard();//teclado
@@ -104,11 +123,12 @@ int main()
 	
 	
 
-	ALLEGRO_BITMAP* bloque = al_load_bitmap("datos/imagenes/pared.png");/*imagenes a utilizar*/
+	ALLEGRO_BITMAP* bloque = al_load_bitmap("datos/imagenes/pared(1).jpg");/*imagenes a utilizar*/
 	ALLEGRO_BITMAP* player = al_load_bitmap("datos/imagenes/pacman.png");
-	ALLEGRO_BITMAP* fondo = al_load_bitmap("datos/imagenes/cesped.jpg");
-	ALLEGRO_BITMAP* zombi = al_load_bitmap("datos/imagenes/fantasma.png");
-	ALLEGRO_BITMAP* objeto = al_load_bitmap("datos/imagenes/corazon.jpg");
+	ALLEGRO_BITMAP* fondo = al_load_bitmap("datos/imagenes/fondo(1).jpg");
+	ALLEGRO_BITMAP* zombi = al_load_bitmap("datos/imagenes/pacman.png");
+	ALLEGRO_BITMAP* objeto = al_load_bitmap("datos/imagenes/pacman.png");
+	ALLEGRO_BITMAP* entrada = al_load_bitmap("datos/imagenes/puerta1.jpg");
 	//menu
 	ALLEGRO_BITMAP* menu = al_load_bitmap("datos/imagenes/menu.png");//0
 	ALLEGRO_BITMAP* jugar = al_load_bitmap("datos/imagenes/jugar.png");//1
@@ -145,10 +165,12 @@ int main()
 	al_set_sample_instance_playmode(songinstance, ALLEGRO_PLAYMODE_LOOP);
 
 	al_attach_sample_instance_to_mixer(songinstance, al_get_default_mixer());
+	setmapa("datos / mapas / mapa1.txt");//funcion para cargar mapa
 
-	jugador = cargarmapa();//funcion para cargar mapa
+	jugador = setjugador();
 	x = jugador.posicionX;
 	y = jugador.posicionY;
+
 	for (i = 0; i < MAX; i++)
 	{
 		enemigo[i] = cargarenemigo(i);
@@ -161,7 +183,11 @@ int main()
 
 	pared = cargarpared();
 
+
 	//al_play_sample_instance(songinstance);
+	al_convert_mask_to_alpha(zombi, negro);
+	al_convert_mask_to_alpha(objeto, negro);
+	al_convert_mask_to_alpha(player, negro);
 	
 	while (true)
 	{
@@ -186,6 +212,46 @@ int main()
 
 
 			al_draw_bitmap(fondo, 0, 0, 0);
+			//cargar mapa (enemigos,muralla,etc)
+			//if(bandera)
+			//siguiente mapa (contador,revisar gmail)
+			if (stge_nivel == 1)
+			{
+				cont++;
+				jugador = setjugador();
+				for (i = 0; i < MAX; i++)
+				{
+					enemigo[i] = cargarenemigo(i);
+				}
+				for (i = 0; i < MAXELEM; i++)
+				{
+					elemento[i] = cargarelementos(i);
+				}
+				pared = cargarpared();
+				itoa(cont, buffer, 10);
+				setmapa("datos / mapas / mapa2.txt");
+			}
+
+			for (i = 0; i < 2; i++)
+			{
+				printf("%d\n", usuario.puntaje);
+
+				if (nivel >= usuario.puntaje);
+				{
+					//printf("hola\n");
+					al_draw_bitmap_region(entrada, 8, 12, 8, 14, pared.posicionpuertaX[i], pared.posicionpuertaY[i], 0);
+				}
+				if (nivel < usuario.puntaje)
+				{
+					//printf("adios\n");
+					al_draw_bitmap_region(entrada, 18, 12, 11, 15, pared.posicionpuertaX[i], pared.posicionpuertaY[i], 0);
+					if (jugador.posicionX == pared.posicionpuertaX[i] && jugador.posicionY == pared.posicionpuertaY[i])
+					{
+						stge_nivel = 1;
+					}
+				}
+			}
+			
 			for (i = 0; i < M; i++)
 			{
 				for (j = 0; j < N; j++)
@@ -196,55 +262,72 @@ int main()
 
 			for (i = 0; i < MAX; i++)
 			{
-				al_draw_bitmap(zombi, enemigo[i].posicionX * 16, enemigo[i].posicionY * 12, 0);//enemigo
+				//al_draw_bitmap(zombi, enemigo[i].posicionX * 16, enemigo[i].posicionY * 12, 0);//enemigo
+				al_draw_bitmap_region(zombi, 456, 64, 15, 15, enemigo[i].posicionX * 16, enemigo[i].posicionY * 12, 0);
 			}
 
 			for (i = 0; i < MAXELEM; i++)//objetos
 			{
-				al_draw_bitmap(objeto, elemento[i].posicionX, elemento[i].posicionY, 0);
+				//al_draw_bitmap(objeto, elemento[i].posicionX, elemento[i].posicionY, 0);
+				al_draw_bitmap_region(objeto, 603, 49, 8, 14,  elemento[i].posicionX, elemento[i].posicionY, 0);
 			}
 
 			switch (png)//dibujo del jugador
 			{
 			case 0:
 			{
-				al_draw_bitmap_region(player, 473, 1, 12, 12, jugador.posicionX * 16, jugador.posicionY * 12, 0);//derecha
+				rotacion = 1;
 				break;
 			}
 			case 1:
 			{
-				al_draw_bitmap_region(player, 474, 17, 12, 12, jugador.posicionX * 16, jugador.posicionY * 12, 0);//izquierda
+				rotacion = 17;
 				break;
 			}
 			case 2:
 			{
-				al_draw_bitmap_region(player, 473, 34, 12, 12, jugador.posicionX * 16, jugador.posicionY * 12, 0);//arriba
+				rotacion =34;
 				break;
 			}
 			case 3:
 			{
-				al_draw_bitmap_region(player, 473, 49, 12, 12, jugador.posicionX * 16, jugador.posicionY * 12, 0);//abajo
+				rotacion = 49;
 				break;
 			}
 			break;
 			}
+			
+			al_draw_bitmap_region(player, 473, rotacion, 12, 12, jugador.posicionX * 16, jugador.posicionY * 12, 0);//abajo
+
+
+			
 
 			if (jugador.posicionX * 16 > ancho-1 )
 			{
 				jugador.posicionX = 0;
-				printf("posicionX2=%d\n", jugador.posicionX);
 			}
 			if (jugador.posicionX * 16 < -1)
 			{
-				jugador.posicionX = ancho - 16;
-				printf("posicionX=%d\n", jugador.posicionX);
+				jugador.posicionX = 64 - 2;
+			}
+
+			if (jugador.posicionY * 12 > alto - 1)
+			{
+				printf("posicionY%d\n", jugador.posicionY);
+				jugador.posicionY = 0;
+			}
+			if (jugador.posicionY * 12 < -1)
+			{
+				//printf("jugadorY=%d\n", jugador.posicionY);
+				printf("posicionY%d\n", jugador.posicionY);
+				jugador.posicionY = 64 - 1;
 			}
 
 			for (i = 0; i < MAXELEM; i++)//suma de puntaje
 			{
 				if (jugador.posicionX * 16 == elemento[i].posicionX && jugador.posicionY * 12 == elemento[i].posicionY)
 				{
-					puntos = puntaje(puntos);
+					usuario.puntaje = puntaje(usuario.puntaje,elemento[i].valor);
 					elemento[i].posicionX = -30;//intentar cambiarlo 
 					elemento[i].posicionY = -30;
 				}
@@ -254,10 +337,10 @@ int main()
 			{
 				if (jugador.posicionX * 16 == enemigo[i].posicionX * 16 && jugador.posicionY * 12 == enemigo[i].posicionY * 12)//cuando el jugador choca con un enemigo
 				{
-					corazones = vidas(corazones);
+					jugador.vidas = vidas(jugador.vidas);
 					jugador.posicionX = x;
 					jugador.posicionY = y;
-					if (corazones == 0)
+					if (jugador.vidas == 0)
 					{
 						//	al_destroy_bitmap(bloque);//liberacion de memoria
 						//	al_destroy_bitmap(player);
@@ -322,8 +405,8 @@ int main()
 			
 
 			al_draw_rectangle(ancho - 16, 12 * 4, ancho - 16 * 7, 12 * 2, blanco, 30);
-			al_draw_textf(letras, negro, ancho - 16 * 8, 12, NULL, "%d", puntos);
-			al_draw_textf(letras, rojo, ancho - 16 * 2, 12, NULL, "%d", corazones);
+			al_draw_textf(letras, negro, ancho - 16 * 8, 12, NULL, "%d",usuario.puntaje);
+			al_draw_textf(letras, rojo, ancho - 16 * 2, 12, NULL, "%d", jugador.vidas);
 			//al_play_sample(musica, 40, 0.0, 2.0, ALLEGRO_PLAYMODE_ONCE,NULL);
 
 			if (evento.type == ALLEGRO_EVENT_KEY_DOWN)
@@ -387,6 +470,7 @@ int main()
 				}
 				case ALLEGRO_KEY_0:
 				{
+					bandera = 2;
 					al_stop_sample_instance(songinstance);
 					break;
 				}
@@ -397,11 +481,11 @@ int main()
 		}
 		if (bandera == 2)//ranking
 		{
-			bandera = rnk(colors,font,evento,event_queue,puntos,bandera);
+			bandera = rnk(colors,font,evento,event_queue,usuario.puntaje,bandera);
 		}
 		if (bandera == 3)//game over
 		{
-			gmrv = gameover(colors, font, evento, event_queue, puntos);
+			gmrv = gameover(colors, font, evento, event_queue, usuario.puntaje);
 			if (gmrv == 1)
 				return 0;
 			if (gmrv == 2)
@@ -412,25 +496,30 @@ int main()
 	
 	return 0;
 }
-
-movimiento cargarmapa()
+void setmapa(const char* file_name)
 {
-	movimiento jugador;
-	int i=0, j=0;
-
+	int i = 0, j = 0;
+	//char aux[;
 	FILE* mapa;
 
-	mapa = fopen("datos/mapas/mapa1.txt", "r");
-	
+	mapa = fopen(file_name, "r");
+
 	for (i = 0; i < M; i++)
 	{
 		for (j = 0; j < N; j++)
 		{
 			fscanf(mapa, "%c", &mat[j][i]);
 		}
-		//fscanf(mapa, "\n");
+		//fscanf(mapa, "%c",aux);
 	}
 	fclose(mapa);
+}
+
+jugador setjugador()
+{
+	jugador jugador;
+	int i=0, j=0;
+	
 	for (i = 0; i < M; i++)
 	{
 		for (j = 0; j < N; j++)
@@ -469,9 +558,9 @@ zombies cargarenemigo(int index)
 	return enemigo[index];
 }
 
-movimiento cargarelementos(int index)
+elementos cargarelementos(int index)
 {
-	movimiento elemento[MAXELEM];
+	elementos elemento[MAXELEM];
 	int i = 0, j = 0,cont=0;
 
 	for (i = 0; i < M; i++)
@@ -492,7 +581,7 @@ movimiento cargarelementos(int index)
 struct muro cargarpared()
 {
 	struct muro pared ;
-	int i = 0, j = 0;
+	int i = 0, j = 0,cont=0;
 
 	for (i = 0; i < M; i++)
 	{
@@ -506,13 +595,26 @@ struct muro cargarpared()
 
 		}
 	} 
+	for (i = 0; i < M; i++)
+	{
+		for (j = 0; j < N; j++)
+		{
+			if (mat[i][j] == 'm' && cont < 2)
+			{
+				pared.posicionpuertaX[cont] = i * 16;
+				pared.posicionpuertaY[cont] = j * 12;
+				cont++;
+			}
+		}
+	}
 	return pared;
 }
 
-int puntaje(int puntos)
+int puntaje(int puntos,int valor)
 {
-	puntos = puntos + 300;
-	return puntos;
+	user usuario;
+	usuario.puntaje = puntos + valor;
+	return usuario.puntaje;
 }
 
 int vidas(int corazones)
@@ -670,7 +772,7 @@ int rnk(ALLEGRO_COLOR colors[3], ALLEGRO_FONT* font[2], ALLEGRO_EVENT evento, AL
 		{
 			return -1;
 		}
-		case ALLEGRO_KEY_ENTER:
+		case ALLEGRO_KEY_0:
 		{
 			bandera = 3;
 			break;
