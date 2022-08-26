@@ -58,7 +58,7 @@ typedef struct user usuario;
 typedef struct player jugador;
 typedef struct enemy zombies ;
 
-usuario rnk[10];
+usuario rank[10];
 //ctr+k->c
 //implementar cambio de mapas
 //simbolo dentro de mapa que sea una puerta hacia otro nivel 
@@ -91,12 +91,12 @@ int main()
 	jugador jugador;/*movimiento jugador en posiciones X e Y*/
 	elementos elemento[MAXELEM];
 	zombies enemigo[MAX];
-	struct muro pared;
-	user usuario;
+	muro pared;
+	usuario usuario;
 
 	int i = 0, j = 0, cont = 1, contenemigos = 0, movimientojugador = 0;
 	int x = 0, y = 0, bandera = 0, gmrv, derecha = 0, izquierda = 0, arriba = 0, abajo = 0, png = 0;
-	int rotacion = 1, nivel = 900, stge_nivel = 0;
+	int rotacion = 1, nivel = 900, stge_nivel = 0,id=0;
 
 	char buffer;
 	const char* sala = "datos/mapas/mapa";
@@ -171,6 +171,7 @@ int main()
 	al_attach_sample_instance_to_mixer(songinstance, al_get_default_mixer());
 
 	setmapa("datos/mapas/mapa1.txt");//funcion para cargar mapa
+	//id = leerrnk(rank, id);
 
 	jugador = setjugador();
 	x = jugador.posicionX;
@@ -203,7 +204,7 @@ int main()
 		{
 			return 0;
 		}
-		if (bandera == 0)//menu ||agregar menu con mouse||
+		if (bandera == 0)//menu 
 		{
 			bandera = menuflg(inicio, evento, event_queue, bandera);
 			if (bandera == 1)
@@ -220,31 +221,38 @@ int main()
 			if (stge_nivel == 1)
 			{
 				cont++;
-				printf("cont = %d\n");
 				switch (cont)
 				{
 				case 2:
 				{
-					printf("hola\n");
+					printf("mapa2\n");
 					setmapa("datos/mapas/mapa2.txt");
+					break;
 				}
 				case 3:
 				{
 
-					printf("adios\n");
+					printf("mapa3\n");
 					setmapa("datos/mapas/mapa3.txt");
+					break;
 				}
 				case 4:
 				{
+					printf("mapa4\n");
 					setmapa("datos/mapas/mapa4.txt");
+					break;
 				}
 				case 5:
 				{
+					printf("mapa5\n");
 					setmapa("datos/mapas/mapa5.txt");
+					break;
 				}
 				case 6:
 				{
+					printf("mapa6\n");
 					setmapa("datos/mapas/mapa6.txt");
+					break;
 				}
 				default:
 					break;
@@ -279,8 +287,9 @@ int main()
 					//	printf("jugador\n%d\t%d\n", jugador.posicionX, jugador.posicionY);
 					if (jugador.posicionX == pared.posicionpuertaX[i] && jugador.posicionY == pared.posicionpuertaY[i])
 					{
+						printf("paso", stge_nivel);
 						stge_nivel = 1;
-						//		printf("nivel%d", stge_nivel);
+						//printf("nivel%d", stge_nivel);
 					}
 				}
 			}
@@ -386,11 +395,9 @@ int main()
 				}
 			}
 
-			//count algo ++
-			//if count_algo == 20 --> enemigo se mueve y count_algo = 0
 			contenemigos = contenemigos + 1;
 			//printf("contenemigos = %d\n", contenemigos);
-			if (contenemigos == 20)
+			if (contenemigos == 5)
 			{
 				for (i = 0; i < MAX; i++)
 				{
@@ -720,6 +727,10 @@ int menuflg(ALLEGRO_BITMAP* inicio[5], ALLEGRO_EVENT evento, ALLEGRO_EVENT_QUEUE
 			{
 				bandera = -1;
 			}
+			if (mouseX < 325 && mouseX > 22 && mouseY < 663 && mouseY > 602)//ranking
+			{
+				bandera = -1;
+			}
 			break;
 		}
 		default:
@@ -754,7 +765,7 @@ int gameover(ALLEGRO_COLOR colors[3], ALLEGRO_FONT* font[2], ALLEGRO_EVENT event
 	return 0;
 }
 //ranking(primero iniciar,segundo leer, tercero guardar)
-int leerrnk(usuario rank[], int id)
+int leerrnk(usuario rnk[], int id)
 {
 	FILE* ranking;
 	ranking = fopen("datos/ranking/puntaje.txt", "r");
