@@ -58,12 +58,15 @@ typedef struct user usuario;
 typedef struct player jugador;
 typedef struct enemy zombies ;
 
+usuario rnk[10];
+//ctr+k->c
 //implementar cambio de mapas
 //simbolo dentro de mapa que sea una puerta hacia otro nivel 
 //solo aparece si puntaje > ciertos puntos 
 //crear bandera para crear/cambiar mapas
 //an
 void setmapa(const char*file_name);
+int leerrnk(usuario rnk[], int id);
 jugador setjugador();
 elementos cargarelementos(int index);
 zombies cargarenemigo(int index);
@@ -92,11 +95,12 @@ int main()
 	user usuario;
 
 	int i = 0, j = 0, cont = 1, contenemigos = 0, movimientojugador = 0;
-	int x = 0, y = 0, bandera = 0, gmrv, derecha = 0, izquierda = 0, arriba = 0, abajo = 0, png=0;
-	int rotacion = 1,nivel=900,stge_nivel=0;
+	int x = 0, y = 0, bandera = 0, gmrv, derecha = 0, izquierda = 0, arriba = 0, abajo = 0, png = 0;
+	int rotacion = 1, nivel = 900, stge_nivel = 0;
 
-	char buffer[10];
-	const char* sala = "datos / mapas / mapa";
+	char buffer;
+	const char* sala = "datos/mapas/mapa";
+	char* dir;
 	al_init();			/*iniciaciones*/
 	
 	al_install_keyboard();//teclado
@@ -165,7 +169,8 @@ int main()
 	al_set_sample_instance_playmode(songinstance, ALLEGRO_PLAYMODE_LOOP);
 
 	al_attach_sample_instance_to_mixer(songinstance, al_get_default_mixer());
-	setmapa("datos / mapas / mapa1.txt");//funcion para cargar mapa
+
+	setmapa("datos/mapas/mapa1.txt");//funcion para cargar mapa
 
 	jugador = setjugador();
 	x = jugador.posicionX;
@@ -210,14 +215,41 @@ int main()
 		{
 			//al_play_sample_instance(songinstance);
 
-
 			al_draw_bitmap(fondo, 0, 0, 0);
-			//cargar mapa (enemigos,muralla,etc)
-			//if(bandera)
-			//siguiente mapa (contador,revisar gmail)
+
 			if (stge_nivel == 1)
 			{
 				cont++;
+				printf("cont = %d\n");
+				switch (cont)
+				{
+				case 2:
+				{
+					printf("hola\n");
+					setmapa("datos/mapas/mapa2.txt");
+				}
+				case 3:
+				{
+
+					printf("adios\n");
+					setmapa("datos/mapas/mapa3.txt");
+				}
+				case 4:
+				{
+					setmapa("datos/mapas/mapa4.txt");
+				}
+				case 5:
+				{
+					setmapa("datos/mapas/mapa5.txt");
+				}
+				case 6:
+				{
+					setmapa("datos/mapas/mapa6.txt");
+				}
+				default:
+					break;
+				}
+
 				jugador = setjugador();
 				for (i = 0; i < MAX; i++)
 				{
@@ -228,30 +260,31 @@ int main()
 					elemento[i] = cargarelementos(i);
 				}
 				pared = cargarpared();
-				itoa(cont, buffer, 10);
-				setmapa("datos / mapas / mapa2.txt");
+				stge_nivel = 0;
 			}
 
 			for (i = 0; i < 2; i++)
 			{
-				printf("%d\n", usuario.puntaje);
-
 				if (nivel >= usuario.puntaje);
 				{
 					//printf("hola\n");
-					al_draw_bitmap_region(entrada, 8, 12, 8, 14, pared.posicionpuertaX[i], pared.posicionpuertaY[i], 0);
+					al_draw_bitmap_region(entrada, 8, 12, 8, 14, pared.posicionpuertaX[i] * 16, pared.posicionpuertaY[i] * 12, 0);
 				}
 				if (nivel < usuario.puntaje)
 				{
 					//printf("adios\n");
-					al_draw_bitmap_region(entrada, 18, 12, 11, 15, pared.posicionpuertaX[i], pared.posicionpuertaY[i], 0);
+					al_draw_bitmap_region(entrada, 18, 12, 11, 15, pared.posicionpuertaX[i] * 16, pared.posicionpuertaY[i] * 12, 0);
+					//	printf("puerta\n");
+					//	printf("%d\t%d\n", pared.posicionpuertaX[i], pared.posicionpuertaY[i]);
+					//	printf("jugador\n%d\t%d\n", jugador.posicionX, jugador.posicionY);
 					if (jugador.posicionX == pared.posicionpuertaX[i] && jugador.posicionY == pared.posicionpuertaY[i])
 					{
 						stge_nivel = 1;
+						//		printf("nivel%d", stge_nivel);
 					}
 				}
 			}
-			
+
 			for (i = 0; i < M; i++)
 			{
 				for (j = 0; j < N; j++)
@@ -269,7 +302,7 @@ int main()
 			for (i = 0; i < MAXELEM; i++)//objetos
 			{
 				//al_draw_bitmap(objeto, elemento[i].posicionX, elemento[i].posicionY, 0);
-				al_draw_bitmap_region(objeto, 603, 49, 8, 14,  elemento[i].posicionX, elemento[i].posicionY, 0);
+				al_draw_bitmap_region(objeto, 603, 49, 8, 14, elemento[i].posicionX, elemento[i].posicionY, 0);
 			}
 
 			switch (png)//dibujo del jugador
@@ -286,7 +319,7 @@ int main()
 			}
 			case 2:
 			{
-				rotacion =34;
+				rotacion = 34;
 				break;
 			}
 			case 3:
@@ -296,13 +329,13 @@ int main()
 			}
 			break;
 			}
-			
+
 			al_draw_bitmap_region(player, 473, rotacion, 12, 12, jugador.posicionX * 16, jugador.posicionY * 12, 0);//abajo
 
 
-			
 
-			if (jugador.posicionX * 16 > ancho-1 )
+
+			if (jugador.posicionX * 16 > ancho - 1)
 			{
 				jugador.posicionX = 0;
 			}
@@ -327,7 +360,7 @@ int main()
 			{
 				if (jugador.posicionX * 16 == elemento[i].posicionX && jugador.posicionY * 12 == elemento[i].posicionY)
 				{
-					usuario.puntaje = puntaje(usuario.puntaje,elemento[i].valor);
+					usuario.puntaje = puntaje(usuario.puntaje, elemento[i].valor);
 					elemento[i].posicionX = -30;//intentar cambiarlo 
 					elemento[i].posicionY = -30;
 				}
@@ -352,7 +385,7 @@ int main()
 					}
 				}
 			}
-			
+
 			//count algo ++
 			//if count_algo == 20 --> enemigo se mueve y count_algo = 0
 			contenemigos = contenemigos + 1;
@@ -402,10 +435,10 @@ int main()
 
 				}
 			}
-			
 
-			al_draw_rectangle(ancho - 16, 12 * 4, ancho - 16 * 7, 12 * 2, blanco, 30);
-			al_draw_textf(letras, negro, ancho - 16 * 8, 12, NULL, "%d",usuario.puntaje);
+
+			//al_draw_rectangle(ancho - 16, 12 * 4, ancho - 16 * 7, 12 * 2, blanco, 30);
+			al_draw_textf(letras, negro, ancho - 16 * 8, 12, NULL, "%d", usuario.puntaje);
 			al_draw_textf(letras, rojo, ancho - 16 * 2, 12, NULL, "%d", jugador.vidas);
 			//al_play_sample(musica, 40, 0.0, 2.0, ALLEGRO_PLAYMODE_ONCE,NULL);
 
@@ -481,6 +514,7 @@ int main()
 		}
 		if (bandera == 2)//ranking
 		{
+			printf("paso bandera");
 			bandera = rnk(colors,font,evento,event_queue,usuario.puntaje,bandera);
 		}
 		if (bandera == 3)//game over
@@ -601,8 +635,8 @@ struct muro cargarpared()
 		{
 			if (mat[i][j] == 'm' && cont < 2)
 			{
-				pared.posicionpuertaX[cont] = i * 16;
-				pared.posicionpuertaY[cont] = j * 12;
+				pared.posicionpuertaX[cont] = i ;
+				pared.posicionpuertaY[cont] = j ;
 				cont++;
 			}
 		}
@@ -682,6 +716,10 @@ int menuflg(ALLEGRO_BITMAP* inicio[5], ALLEGRO_EVENT evento, ALLEGRO_EVENT_QUEUE
 			{
 				bandera = 1;
 			}
+			if (mouseX < 981 && mouseX > 678 && mouseY < 454 && mouseY > 392)//salir
+			{
+				bandera = -1;
+			}
 			break;
 		}
 		default:
@@ -715,6 +753,25 @@ int gameover(ALLEGRO_COLOR colors[3], ALLEGRO_FONT* font[2], ALLEGRO_EVENT event
 	}
 	return 0;
 }
+//ranking(primero iniciar,segundo leer, tercero guardar)
+int leerrnk(usuario rank[], int id)
+{
+	FILE* ranking;
+	ranking = fopen("datos/ranking/puntaje.txt", "r");
+	if (ranking == NULL)
+	{
+		printf("no se abrio el archivo");
+		exit(-1);
+	}
+	while (!feof(ranking))
+	{
+		fscanf(ranking, "%s", rank[id].nombre);
+		fscanf(ranking, "%s", rank[id].puntaje);
+		id++;
+	}
+	fclose(ranking);
+	return id;
+}
 
 int rnk(ALLEGRO_COLOR colors[3], ALLEGRO_FONT* font[2], ALLEGRO_EVENT evento, ALLEGRO_EVENT_QUEUE* event_queue, int puntos, int bandera)
 {
@@ -728,68 +785,25 @@ int rnk(ALLEGRO_COLOR colors[3], ALLEGRO_FONT* font[2], ALLEGRO_EVENT evento, AL
 	rank = al_fopen("datos/ranking/puntajeallegro.txt", "w+");
 	ranking = fopen("datos/ranking/puntaje.txt", "w+");//escritura o creacion del ranking en caso de que no exista
 
+	al_clear_to_color(colors[0]);
 	jugador.puntaje = puntos;
 	printf("%d", jugador.puntaje);
 	al_draw_text(font[1], colors[1], 16*15, alto / 2 + 12 * 10, NULL, "ingrese nombre usuario: ");
-	if (evento.type == ALLEGRO_EVENT_KEY_DOWN)
-	{
-		switch (evento.keyboard.keycode)/*hacer una accion para cada tecla pulsada*/
-		{
-		case ALLEGRO_KEY_P:
-		{
-			al_draw_text(font[1], colors[1], espacio, alto / 2 + 12 * 10, 0, "p");
-			jugador.nombre[i] = 'p';
-			printf("jugador.nombre[%d]=%c\n", i, jugador.nombre[i]);
-			i++;
-			break;
-		}
-		case ALLEGRO_KEY_I:
-		{
-			al_draw_text(font[1], colors[1], espacio, alto / 2 + 12 * 10, 0, "i");
-			jugador.nombre[i] = 'i';
-			printf("jugador.nombre[%d]=%c\n", i, jugador.nombre[i]);
-			i++;
-			break;
-		}
-		case ALLEGRO_KEY_N:
-		{
-			al_draw_text(font[1], colors[1], espacio, alto / 2 + 12 * 10, 0, "n");
-			jugador.nombre[i] = 'n';
-			printf("jugador.nombre[%d]=%c\n", i, jugador.nombre[i]);
-			i++;
-			break;
-		}
-		case ALLEGRO_KEY_O:
-		{
-			al_draw_text(font[1], colors[1], espacio, alto / 2 + 12 * 10, 0, "o");
-			jugador.nombre[i] = 'o';
-			printf("jugador.nombre[%d]=%c\n", i, jugador.nombre[i]);
-			i++;
+	
+	//while (i < 2)
+	//{
+	//	scanf("%s",jugador.nombre);
+	//	//printf("i = %d\n", i);
 
-			break;
-		}
-		case ALLEGRO_KEY_ESCAPE:
-		{
-			return -1;
-		}
-		case ALLEGRO_KEY_0:
-		{
-			bandera = 3;
-			break;
-		}
-		default:
-			break;
-		}
-	}
-	while (i < 30)
-	{
-		printf("i = %d\n", i);
-		strcpy(jugador.nombre, name);
-		fprintf(ranking, "%c-%d\n", jugador.nombre, puntos);//c++
-		al_fputs(rank, jugador.nombre);//allegro
-		al_fputc(rank, jugador.puntaje);
-		i = i + 1;
-	}
+	//	//strcpy(jugador.nombre, name);
+
+	//	fprintf(ranking, "%c-%d\n", jugador.nombre, puntos);//c++
+
+	//	al_fputs(rank, jugador.nombre);//allegro
+
+	//	al_fputc(rank, jugador.puntaje);
+	//	i = i + 1;
+	//}
 	al_fclose(rank);
 	fclose(ranking);
 	return bandera;
