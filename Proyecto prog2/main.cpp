@@ -99,7 +99,7 @@ int main()
 
 	int i = 0, j = 0, cont = 1, contenemigos = 0, movimientojugador = 0;
 	int x = 0, y = 0, bandera = 0, gmrv, derecha = 0, izquierda = 0, arriba = 0, abajo = 0, png = 0;
-	int rotacion = 1, nivel = 900, nivel_cont = 1, stge_nivel = 0, id = 0, azar, saverank = 0, puntos = 0, index_user = 0;
+	int rotacion = 1, nivel = 10000, nivel_cont = 1, stge_nivel = 0, id = 0, azar, saverank = 0, puntos = 0, index_user = 0;
 	int keycode, escribir_nombre=0;
 
 	char buffer;
