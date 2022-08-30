@@ -15,7 +15,7 @@
 #define M 64
 #define N 64
 #define MAX 5
-#define MAXELEM 100
+#define MAXELEM 300
 #define NOMBRE 50
 #define MAXRANKING 10
 
