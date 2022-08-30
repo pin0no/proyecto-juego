@@ -15,8 +15,9 @@
 #define M 64
 #define N 64
 #define MAX 5
-#define MAXELEM 10
-#define NOMBRE 10
+#define MAXELEM 100
+#define NOMBRE 50
+#define MAXRANKING 10
 
 int puntaje(int puntos,int valor);//funcion para el puntaje
 int vidas(int corazones);
@@ -46,11 +47,13 @@ struct enemy
 {
 	int posicionX=0;
 	int posicionY=0;
+	int originalX = 0;
+	int originalY = 0;
 	int personalidad = 0;
 };
 struct user 
 {
-	char nombre[30];
+	char nombre[30]="NA";
 	int puntaje=0;
 };
 
@@ -61,9 +64,11 @@ typedef struct enemy zombies ;
 
 //ctr+k->c
 void setmapa(const char*file_name);
-int leerrnk(usuario rnk[], int id);
-int verrnk(ALLEGRO_BITMAP* inicio[6],ALLEGRO_COLOR colors[3], ALLEGRO_FONT* font[3], ALLEGRO_EVENT evento, ALLEGRO_EVENT_QUEUE* event_queue, usuario rnk[], int id);
-int guardarrnk(ALLEGRO_COLOR colors[3], ALLEGRO_FONT* font[3], ALLEGRO_EVENT evento, ALLEGRO_EVENT_QUEUE* event_queue, int puntos, int bandera);
+int leerrnk(usuario rnk[MAXRANKING]);
+int verrnk(ALLEGRO_BITMAP* inicio[6],ALLEGRO_COLOR colors[3], ALLEGRO_FONT* font[3], ALLEGRO_EVENT evento, ALLEGRO_EVENT_QUEUE* event_queue, usuario rnk[MAXRANKING]);
+int guardarrnk(ALLEGRO_COLOR colors[3], ALLEGRO_FONT* font[3], ALLEGRO_EVENT evento, ALLEGRO_EVENT_QUEUE* event_queue, int puntos, int bandera,usuario rnk[MAXRANKING],int id);
+void ordenar(usuario rank[MAXRANKING]);
+void guardarrnk2( usuario rnk[MAXRANKING]);
 int personalidad(zombies enemigo[], int i);
 jugador setjugador();
 elementos cargarelementos(int index);
@@ -72,7 +77,7 @@ struct muro cargarpared();
 
 using namespace std;
 
-usuario rank[10];
+usuario rank[MAXRANKING];
 char mat[M][N];
 int mouseX = -1;
 int mouseY = -1;
@@ -91,13 +96,15 @@ int main()
 	elementos elemento[MAXELEM];
 	zombies enemigo[MAX];
 	muro pared;
-	usuario usuario;
 
 	int i = 0, j = 0, cont = 1, contenemigos = 0, movimientojugador = 0;
 	int x = 0, y = 0, bandera = 0, gmrv, derecha = 0, izquierda = 0, arriba = 0, abajo = 0, png = 0;
-	int rotacion = 1, nivel = 900, stge_nivel = 0,id=0,azar;
+	int rotacion = 1, nivel = 900, nivel_cont = 1, stge_nivel = 0, id = 0, azar, saverank = 0, puntos = 0, index_user = 0;
+	int keycode, escribir_nombre=0;
 
 	char buffer;
+	char username[NOMBRE]="";
+	int tecla=0;
 	const char* sala = "datos/mapas/mapa";
 	char* dir;
 	al_init();			/*iniciaciones*/
@@ -177,7 +184,7 @@ int main()
 	al_attach_sample_instance_to_mixer(songinstance, al_get_default_mixer());
 
 	setmapa("datos/mapas/mapa1.txt");//funcion para cargar mapa
-	leerrnk(rank, id);
+	id=leerrnk(rank);
 
 	jugador = setjugador();
 	x = jugador.posicionX;
@@ -223,25 +230,23 @@ int main()
 		if (bandera == 1)//juego
 		{
 			//al_play_sample_instance(songinstance);
-
 			al_draw_bitmap(fondo, 0, 0, 0);
-			printf("cont=%d\n", cont);
+			//printf("cont=%d\n", cont);
 
 			for (i = 0; i < 2; i++)
 			{
-				if (nivel >= usuario.puntaje);
+				if (nivel >= puntos);
 				{
 					al_draw_bitmap_region(entrada, 8, 12, 8, 14, pared.posicionpuertaX[i] * 16, pared.posicionpuertaY[i] * 12, 0);
 				}
-				if (nivel < usuario.puntaje)
+				if (nivel < puntos)
 				{
 					al_draw_bitmap_region(entrada, 18, 12, 11, 15, pared.posicionpuertaX[i] * 16, pared.posicionpuertaY[i] * 12, 0);
 
 					if (jugador.posicionX == pared.posicionpuertaX[i] && jugador.posicionY == pared.posicionpuertaY[i])
 					{
 						stge_nivel = 1;
-						nivel = nivel + 1;
-
+						nivel = nivel * nivel_cont;
 					}
 				}
 			}
@@ -360,13 +365,13 @@ int main()
 
 			if (jugador.posicionY * 12 > alto - 1)
 			{
-				printf("posicionY%d\n", jugador.posicionY);
+				//printf("posicionY%d\n", jugador.posicionY);
 				jugador.posicionY = 0;
 			}
 			if (jugador.posicionY * 12 < -1)
 			{
 				//printf("jugadorY=%d\n", jugador.posicionY);
-				printf("posicionY%d\n", jugador.posicionY);
+				//printf("posicionY%d\n", jugador.posicionY);
 				jugador.posicionY = 64 - 1;
 			}
 
@@ -374,8 +379,8 @@ int main()
 			{
 				if (jugador.posicionX * 16 == elemento[i].posicionX && jugador.posicionY * 12 == elemento[i].posicionY)
 				{
-					usuario.puntaje = puntaje(usuario.puntaje, elemento[i].valor);
-					elemento[i].posicionX = -30;//intentar cambiarlo 
+					puntos = puntaje(puntos, elemento[i].valor);
+					elemento[i].posicionX = -30;
 					elemento[i].posicionY = -30;
 				}
 			}
@@ -384,17 +389,18 @@ int main()
 			{
 				if (jugador.posicionX * 16 == enemigo[i].posicionX * 16 && jugador.posicionY * 12 == enemigo[i].posicionY * 12)//cuando el jugador choca con un enemigo
 				{
+					for (j = 0; j < MAX; j++)
+					{
+						enemigo[j].posicionX = enemigo[j].originalX;
+						enemigo[j].posicionY = enemigo[j].originalY;
+					}
 					jugador.vidas = vidas(jugador.vidas);//copiar esto para el movimiento enemigo
 					jugador.posicionX = x;
 					jugador.posicionY = y;
 					if (jugador.vidas == 0)
 					{
-						//	al_destroy_bitmap(bloque);//liberacion de memoria
-						//	al_destroy_bitmap(player);
-						//	al_destroy_bitmap(fondo);
-						//	al_destroy_bitmap(zombi);
-						//	al_destroy_bitmap(objeto);
 						al_show_mouse_cursor(ventana);
+						saverank = 0;
 						bandera = 2;
 					}
 				}
@@ -513,8 +519,9 @@ int main()
 
 
 			al_convert_mask_to_alpha(corazones, azul);
-			//al_draw_rectangle(ancho - 16, 12 * 4, ancho - 16 * 7, 12 * 2, blanco, 30);
-			al_draw_textf(letras3, negro, ancho - 16 * 11, 12, NULL, "%d", usuario.puntaje);
+
+			al_draw_textf(letras3, negro, ancho - 16 * 11, 12, NULL, "%d", puntos);
+
 			if (jugador.vidas>=1)
 			{
 				al_draw_bitmap_region(corazones, 4, 0, 28, 28, ancho - 16 * 2, 12, 0);
@@ -527,9 +534,6 @@ int main()
 			{
 				al_draw_bitmap_region(corazones, 4, 0, 28, 28, ancho - 16 * 6, 12, 0);
 			}
-
-			//al_draw_textf(letras3, rojo, ancho - 16 * 2, 12, NULL, "%d", jugador.vidas);
-			//al_play_sample(musica, 40, 0.0, 2.0, ALLEGRO_PLAYMODE_ONCE,NULL);
 
 			if (evento.type == ALLEGRO_EVENT_KEY_DOWN)
 			{
@@ -581,11 +585,6 @@ int main()
 				}
 				case ALLEGRO_KEY_ENTER:
 				{
-					//	al_destroy_bitmap(bloque);
-					//	al_destroy_bitmap(player);
-					//	al_destroy_bitmap(fondo);
-					//	al_destroy_bitmap(zombi);
-					//	al_destroy_bitmap(objeto);
 					al_show_mouse_cursor(ventana);
 					bandera = 2;
 					break;
@@ -603,11 +602,67 @@ int main()
 		}
 		if (bandera == 2)//nombre
 		{
-			bandera = guardarrnk(colors,font,evento,event_queue,usuario.puntaje,bandera);
+			al_clear_to_color(negro);
+			if (saverank == 0)
+			{
+				if (puntos > rank[MAXRANKING-1].puntaje )
+				{
+					//al_draw_text(letras, blanco, 16 * 15, alto / 2 + 12 * 10, NULL, "ingrese nombre usuario: ");
+
+					index_user = 0;
+
+					while (escribir_nombre == 0) 
+					{
+
+						al_clear_to_color(negro);
+						al_draw_bitmap(puntajes, 0, 0, 0);
+						al_wait_for_event(event_queue, &evento);
+						if (evento.type == ALLEGRO_EVENT_KEY_DOWN) 
+						{
+							if (evento.keyboard.keycode >= ALLEGRO_KEY_A && evento.keyboard.keycode <= ALLEGRO_KEY_Z) 
+							{
+								username[index_user] = username[index_user] + 'a' + (evento.keyboard.keycode - ALLEGRO_KEY_A);
+								printf("%c", username[index_user]);
+								index_user++;
+							}
+						}
+						if (evento.type == ALLEGRO_EVENT_KEY_DOWN) 
+						{
+							if (evento.keyboard.keycode == ALLEGRO_KEY_ENTER) 
+							{
+								escribir_nombre = 1;
+							}
+						}
+						al_draw_text(letras, blanco, 16 * 5, alto / 2 - 12 * 8, 0, "Escriba su nombre:");
+						al_draw_textf(letras, blanco, ancho / 2 - 16 * index_user, alto / 2 + 12 * 6, 0, "%s", username);
+						al_flip_display();
+					}
+					
+					strcpy(rank[MAXRANKING-1].nombre, username);
+					rank[MAXRANKING - 1].puntaje = puntos;
+					printf("%s %d\n", rank[MAXRANKING - 1].nombre, rank[MAXRANKING - 1].puntaje);
+					ordenar(rank);
+					guardarrnk2(rank);
+				}
+
+				saverank++;
+			}
+			if (evento.type == ALLEGRO_EVENT_KEY_DOWN)
+			{
+				switch (evento.keyboard.keycode)/*hacer una accion para cada tecla pulsada*/
+				{
+				case ALLEGRO_KEY_1:
+				{
+					bandera = 3;
+				}
+				default:
+					break;
+				}
+			}
 		}
 		if (bandera == 3)//game over
 		{
-			gmrv = gameover(colors, font, evento, event_queue, usuario.puntaje);
+			gmrv = gameover(colors, font, evento, event_queue, puntos);
 			if (gmrv == 1)
 				return 0;
 			if (gmrv == 2)
@@ -615,7 +670,7 @@ int main()
 		}
 		if (bandera == 4)/*ranking*/
 		{
-			bandera = verrnk(inicio,colors, font, evento, event_queue, rank, id);
+			bandera = verrnk(inicio,colors, font, evento, event_queue, rank);
 		}
 		al_flip_display();
 	}
@@ -684,6 +739,8 @@ zombies cargarenemigo(int index)
 				enemigo[cont].personalidad = 0;
 				enemigo[cont].posicionX = i ;
 				enemigo[cont].posicionY = j ;
+				enemigo[cont].originalX = i;
+				enemigo[cont].originalY = j;
 
 				cont++;
 			}
@@ -858,31 +915,54 @@ int gameover(ALLEGRO_COLOR colors[3], ALLEGRO_FONT* font[3], ALLEGRO_EVENT event
 	}
 	return 0;
 }
-//ranking(primero iniciar,segundo leer, tercero guardar)
-int leerrnk(usuario rnk[], int id)
+
+int leerrnk(usuario rnk[MAXRANKING])
 {
+	int id = 0;
 	FILE* ranking;
-	ranking = fopen("datos/ranking/rank.txt", "r");
+	ranking = fopen("datos/ranking/rank.txt", "r+");
 	if (ranking == NULL)
 	{
 		printf("no se abrio el archivo");
 		exit(-1);
 	}
-	while (!feof(ranking))
+	for (id = 0; id < MAXRANKING; id++)
 	{
-		fscanf(ranking, "%s", &rank[id].nombre);
+		fscanf(ranking, "%s", rank[id].nombre);
 		fscanf(ranking, "%d", &rank[id].puntaje);
-		id++;
 	}
 	fclose(ranking);
 	return id;
 }
 
-int verrnk(ALLEGRO_BITMAP* inicio[6],ALLEGRO_COLOR colors[3], ALLEGRO_FONT* font[3], ALLEGRO_EVENT evento, ALLEGRO_EVENT_QUEUE* event_queue,usuario rnk[], int id)
+//ranking(primero iniciar,segundo leer, tercero guardar)
+//int leerrnk2(usuario rnk[MAXRANKING] )
+//{
+//	int id=0;
+//	FILE* ranking;
+//	ranking = fopen("datos/ranking/rank.txt", "r+");
+//	if (ranking == NULL)
+//	{
+//		printf("no se abrio el archivo");
+//		exit(-1);
+//	}
+//	while (!feof(ranking))
+//	{
+//		fscanf(ranking, "%s", rank[id].nombre);
+//		fscanf(ranking, "%d", &rank[id].puntaje);
+//		//printf("%d.-%s %d\n", id, rank[id].nombre, rank[id].puntaje);
+//		id++;
+//	}
+//	
+//	fclose(ranking);
+//	return id;
+//}
+
+int verrnk(ALLEGRO_BITMAP* inicio[6],ALLEGRO_COLOR colors[3], ALLEGRO_FONT* font[3], ALLEGRO_EVENT evento, ALLEGRO_EVENT_QUEUE* event_queue,usuario rnk[MAXRANKING])
 {
-	int i=1,j=0;
+	int i=1,j=0,id=0;
 	al_draw_bitmap(inicio[5], 0, 0, 0);
-	for (id = 0; id < 9; id++)
+	for (id = 0; id < MAXRANKING; id++)
 	{
 		j++;
 		printf("%s\t%d\n", rank[id].nombre, rank[id].puntaje);
@@ -905,36 +985,26 @@ int verrnk(ALLEGRO_BITMAP* inicio[6],ALLEGRO_COLOR colors[3], ALLEGRO_FONT* font
 	}
 	return 4;
 }
-
-int guardarrnk(ALLEGRO_COLOR colors[3], ALLEGRO_FONT* font[3], ALLEGRO_EVENT evento, ALLEGRO_EVENT_QUEUE* event_queue, int puntos, int bandera)
+//----- 500 "----- = nombres"
+//----- 450
+//----- 400
+//#define MAXRRANK 5
+//main()
+//	struct rank ranking[MAXRANK]
+//	loadranking(ranking)
+int guardarrnk(ALLEGRO_COLOR colors[3], ALLEGRO_FONT* font[3], ALLEGRO_EVENT evento, ALLEGRO_EVENT_QUEUE* event_queue, int puntos, int bandera, usuario rnk[MAXRANKING],int id)
 {
 	int i = 0, espacio = ancho / 2 - 16 * 6;
-	FILE* ranking;
-	ranking = fopen("datos/ranking/rank.txt", "w");//escritura o creacion del ranking en caso de que no exista
-	printf("ciclo\n");
-
-	if (ranking == NULL)
-	{
-		printf("no se abrio el archivo");
-		exit(-1);
-	}
 
 	al_clear_to_color(colors[0]);
 	al_draw_text(font[1], colors[1], 16*15, alto / 2 + 12 * 10, NULL, "ingrese nombre usuario: ");
-	if (feof(ranking))
-	{
-		printf("hola");
-		fprintf(ranking, "%s  %d", rank[0].nombre, puntos);
-	}
 
-	fclose(ranking);
 	if (evento.type == ALLEGRO_EVENT_KEY_DOWN)
 	{
 		switch (evento.keyboard.keycode)/*hacer una accion para cada tecla pulsada*/
 		{
 		case ALLEGRO_KEY_1:
 		{
-			printf("paso\n");
 			return 3;
 		}
 		default:
@@ -942,4 +1012,38 @@ int guardarrnk(ALLEGRO_COLOR colors[3], ALLEGRO_FONT* font[3], ALLEGRO_EVENT eve
 		}
 	}
 	return bandera;
+}
+
+void guardarrnk2( usuario rnk[MAXRANKING])
+{
+	int i = 0;
+	FILE* ranking;
+	ranking = fopen("datos/ranking/rank.txt", "w");
+
+	if (ranking == NULL)
+	{
+		printf("no se abrio el archivo");
+		exit(-1);
+	}
+	for (i = 0; i < MAXRANKING; i++)
+	{
+		fprintf(ranking, "%s ", rank[i].nombre);
+		fprintf(ranking, " %d\n", rank[i].puntaje);
+	}
+	fclose(ranking);
+}
+
+void ordenar(usuario rank[MAXRANKING])
+{
+	int id = 0, i = 1;
+	usuario aux;
+	for (i = MAXRANKING; i > 0; i--)
+	{
+		if (rank[i].puntaje > rank[i - 1].puntaje)
+		{
+			aux = rank[i - 1];
+			rank[i - 1] = rank[i];
+			rank[i] = aux;
+		}
+	}
 }

@@ -1,0 +1,10 @@
+test  2100
+ulloa  2100
+diego  2100
+brunojuanalbertodelasmercedesytr4  2100
+pedro  1500
+juan  1500
+bruno  1500
+test  1200
+bruno  900
+cris  800

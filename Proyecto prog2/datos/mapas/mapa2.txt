@@ -1,4 +1,13 @@
 xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+x            v                                      xxxxxxxxxxx
+x                                                   xxxxxxxxxxx
+x                                                   xxxxxxxxxxx
+x                                                             x
+x                                                             x
+x                                                             x
+x                                                             x
+x                                                             x
+x                          e                                  x
 x                                                             x
 x                                                             x
 x                                                             x
@@ -6,27 +15,18 @@ x                                                             x
 x                                                             x
 x                                                             x
 x                                                             x
-x                 xxxxxxxxxxxxxxxxxxx                         x
-x                 x        e        x                         x
-x                 x                 x                         x
-x                 x                 x                         x
-x                 x                 x                         x
-x                 x                 x                         x
-x                 x                 x                         x
-x                 x                 x                         x
-x                 x                 x                         x
-x                 x   e             x                         x
-xxxxxxxxxxxxxxxxxxx                 x xxxxxxxxxxxxxxxx        x
+x                     e                                       x
+x                                                             x
 x                                                    x        x
 x                                   e                x        x
-x                     vxxxxxxxxxxxxxxx               x        x
-x                      xx     v  p   x               x        x
-x                     vxx  xxxxxxxxxxx               x        x
-x                      xx  xx                        x        x
-x                      xx vxx       v                x        x
-x                      xx  xx                        x        x
-x                  m  vvvv xx                        x        x
-x                  xxxxxxxxxx                        x        x
+x                     v                              x        x
+x                             v  p   x               x        x
+x                     v    xxxxxxxxxxx               x        x
+x                                                    x        x
+x                         v         v                x        x
+x                                                    x        x
+x                  m  vvvv                           x        x
+x                                                    x        x
 x                                       e            x        x
 x                                                    x        x
 x                  xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx        x
